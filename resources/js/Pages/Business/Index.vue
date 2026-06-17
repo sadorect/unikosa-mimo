@@ -19,7 +19,7 @@ const filter = () => {
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">Business Directory</h2>
-                <Link :href="route('business.create')" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded">List Your Business</Link>
+                <Link :href="route('business.create')" class="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded">List Your Business</Link>
             </div>
         </template>
         <div class="py-12">
@@ -42,7 +42,7 @@ const filter = () => {
                         </div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">{{ biz.description }}</p>
                         <div class="text-xs text-gray-500">Listed by {{ biz.owner?.name }}</div>
-                        <div v-if="biz.website" class="text-xs text-amber-600 mt-1">{{ biz.website }}</div>
+                        <div v-if="biz.website" class="text-xs text-accent-600 mt-1">{{ biz.website }}</div>
                     </Link>
                 </div>
 

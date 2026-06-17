@@ -34,11 +34,11 @@ const submitUpload = () => {
         <template #header>
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <Link :href="route('gallery.index')" class="text-amber-600 hover:text-amber-700 text-sm">Gallery</Link>
+                    <Link :href="route('gallery.index')" class="text-accent-600 hover:text-accent-700 text-sm">Gallery</Link>
                     <span class="text-gray-400">/</span>
                     <span class="text-gray-700 dark:text-gray-300 text-sm">{{ album.title }}</span>
                 </div>
-                <button @click="showUpload = !showUpload" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded">
+                <button @click="showUpload = !showUpload" class="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded">
                     Upload Media
                 </button>
             </div>
@@ -48,14 +48,14 @@ const submitUpload = () => {
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{{ album.title }}</h1>
                     <p v-if="album.description" class="text-gray-600 dark:text-gray-400 mt-2">{{ album.description }}</p>
-                    <div v-if="album.event" class="mt-2 text-sm text-amber-600">Event: {{ album.event.title }}</div>
+                    <div v-if="album.event" class="mt-2 text-sm text-accent-600">Event: {{ album.event.title }}</div>
                 </div>
 
                 <div v-if="showUpload" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Upload Media</h3>
                     <form @submit.prevent="submitUpload">
                         <input type="file" multiple accept="image/*,video/*" @change="handleFileChange"
-                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100" />
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent-50 file:text-accent-700 hover:file:bg-accent-100" />
                         <div v-if="uploadForm.files.length" class="mt-4 space-y-2">
                             <div v-for="(file, i) in uploadForm.files" :key="i" class="flex items-center gap-3">
                                 <span class="text-sm text-gray-600">{{ file.name }}</span>
@@ -63,7 +63,7 @@ const submitUpload = () => {
                                     class="flex-1 text-sm border-gray-300 rounded-md shadow-sm dark:bg-gray-700" />
                             </div>
                         </div>
-                        <button type="submit" class="mt-4 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded"
+                        <button type="submit" class="mt-4 bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded"
                             :disabled="uploadForm.processing || !uploadForm.files.length">Upload</button>
                     </form>
                 </div>

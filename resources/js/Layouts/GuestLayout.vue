@@ -1,5 +1,6 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import ThemeToggle from '@/Components/ThemeToggle.vue';
 </script>
 
 <template>
@@ -7,17 +8,18 @@ import { Link } from '@inertiajs/vue3';
         <!-- Public nav -->
         <nav class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <Link href="/" class="text-xl font-bold text-amber-500 tracking-wide">
+                <Link href="/" class="text-xl font-bold text-accent-500 tracking-wide">
                     {{ $page.props.settings?.site_name || 'UNIKOSA' }}
                 </Link>
                 <div class="flex items-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-400">
-                    <Link href="/" class="hover:text-amber-500 transition">Home</Link>
-                    <Link :href="route('transparency.index')" class="hover:text-amber-500 transition">Transparency</Link>
-                    <Link :href="route('login')" class="hover:text-amber-500 transition">Sign In</Link>
+                    <Link href="/" class="hover:text-accent-500 transition">Home</Link>
+                    <Link :href="route('transparency.index')" class="hover:text-accent-500 transition">Transparency</Link>
+                    <Link :href="route('login')" class="hover:text-accent-500 transition">Sign In</Link>
                     <Link :href="route('register')"
-                        class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-full transition text-sm font-semibold">
+                        class="bg-accent-500 hover:bg-accent-600 text-white px-4 py-1.5 rounded-full transition text-sm font-semibold">
                         Join Now
                     </Link>
+                    <ThemeToggle />
                 </div>
             </div>
         </nav>

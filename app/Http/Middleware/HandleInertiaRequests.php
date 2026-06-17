@@ -34,6 +34,13 @@ class HandleInertiaRequests extends Middleware
                 'accent_color' => Setting::get('accent_color', '#F59E0B'),
                 'theme_mode' => Setting::get('theme_mode', 'light'),
                 'font_family' => Setting::get('font_family', 'Inter'),
+                'social' => [
+                    'facebook' => Setting::get('social_facebook'),
+                    'twitter' => Setting::get('social_twitter'),
+                    'instagram' => Setting::get('social_instagram'),
+                    'linkedin' => Setting::get('social_linkedin'),
+                    'youtube' => Setting::get('social_youtube'),
+                ],
             ],
             'notifications' => [
                 'unread_count' => fn () => $request->user()

@@ -20,9 +20,11 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        DB::statement("ALTER TABLE forum_posts ADD COLUMN search_vector tsvector");
-        DB::statement("CREATE INDEX forum_posts_search_idx ON forum_posts USING GIN(search_vector)");
-        DB::statement("CREATE TRIGGER forum_posts_search_update BEFORE INSERT OR UPDATE ON forum_posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'pg_catalog.english', title, body)");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE forum_posts ADD COLUMN search_vector tsvector");
+            DB::statement("CREATE INDEX forum_posts_search_idx ON forum_posts USING GIN(search_vector)");
+            DB::statement("CREATE TRIGGER forum_posts_search_update BEFORE INSERT OR UPDATE ON forum_posts FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'pg_catalog.english', title, body)");
+        }
     }
 
     public function down(): void

@@ -20,7 +20,7 @@ const submitReply = () => {
         <Head :title="post.title" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('forum.index')" class="text-amber-600 hover:text-amber-700 text-sm">Forum</Link>
+                <Link :href="route('forum.index')" class="text-accent-600 hover:text-accent-700 text-sm">Forum</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm">{{ post.group?.name }}</span>
             </div>
@@ -29,7 +29,7 @@ const submitReply = () => {
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
                     <div class="flex items-center gap-3 mb-4">
-                        <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 font-bold">
+                        <div class="w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center text-accent-600 font-bold">
                             {{ post.author?.name?.charAt(0) }}
                         </div>
                         <div>
@@ -63,9 +63,9 @@ const submitReply = () => {
                     <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3">Post a Reply</h4>
                     <form @submit.prevent="submitReply">
                         <textarea v-model="replyForm.body" rows="3" placeholder="Write your reply..."
-                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-gray-700 dark:border-gray-600" required></textarea>
+                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 dark:bg-gray-700 dark:border-gray-600" required></textarea>
                         <div v-if="replyForm.errors.body" class="text-red-500 text-sm mt-1">{{ replyForm.errors.body }}</div>
-                        <button type="submit" class="mt-3 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded" :disabled="replyForm.processing">
+                        <button type="submit" class="mt-3 bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded" :disabled="replyForm.processing">
                             Post Reply
                         </button>
                     </form>

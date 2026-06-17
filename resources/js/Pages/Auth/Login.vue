@@ -31,7 +31,7 @@ const submit = () => {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email address</label>
                     <input v-model="form.email" type="email" autocomplete="email"
-                        class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                        class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition"
                         required autofocus placeholder="you@example.com" />
                     <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
                 </div>
@@ -39,13 +39,13 @@ const submit = () => {
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
                     <input v-model="form.password" type="password" autocomplete="current-password"
-                        class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition"
+                        class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition"
                         required placeholder="••••••••" />
                     <p v-if="form.errors.password" class="mt-1 text-xs text-red-500">{{ form.errors.password }}</p>
                 </div>
 
                 <button type="submit"
-                    class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-4 rounded-lg transition disabled:opacity-60"
+                    class="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 px-4 rounded-lg transition disabled:opacity-60"
                     :disabled="form.processing">
                     {{ form.processing ? 'Signing in…' : 'Sign In' }}
                 </button>
@@ -54,11 +54,11 @@ const submit = () => {
             <div class="mt-6 space-y-2 text-center text-sm text-gray-500 dark:text-gray-400">
                 <p>
                     Don't have an account?
-                    <Link :href="route('register')" class="text-amber-600 hover:text-amber-700 font-medium">Join the network</Link>
+                    <Link :href="route('register')" class="text-accent-600 hover:text-accent-700 font-medium">Join the network</Link>
                 </p>
                 <p>
                     Have a pre-loaded profile?
-                    <Link :href="route('claim-profile.show')" class="text-amber-600 hover:text-amber-700 font-medium">Claim it here</Link>
+                    <Link :href="route('claim-profile.show')" class="text-accent-600 hover:text-accent-700 font-medium">Claim it here</Link>
                 </p>
             </div>
         </div>

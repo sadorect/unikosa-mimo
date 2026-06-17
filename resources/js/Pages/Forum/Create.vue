@@ -43,7 +43,7 @@ const submit = () => {
                             <textarea v-model="form.body" rows="8" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" required></textarea>
                             <div v-if="form.errors.body" class="text-red-500 text-sm mt-1">{{ form.errors.body }}</div>
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit Post</button>
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit Post</button>
                     </form>
                 </div>
             </div>

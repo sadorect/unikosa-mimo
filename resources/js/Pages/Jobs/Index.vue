@@ -29,7 +29,7 @@ const filter = () => {
         <template #header>
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">Job Board</h2>
-                <Link :href="route('jobs.create')" class="bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium px-4 py-2 rounded">Post a Job</Link>
+                <Link :href="route('jobs.create')" class="bg-accent-500 hover:bg-accent-600 text-white text-sm font-medium px-4 py-2 rounded">Post a Job</Link>
             </div>
         </template>
         <div class="py-12">

@@ -65,7 +65,7 @@ const submit = () => {
                             </div>
                             <div class="flex items-end pb-1">
                                 <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="checkbox" v-model="form.is_remote" class="rounded border-gray-300 text-amber-500" />
+                                    <input type="checkbox" v-model="form.is_remote" class="rounded border-gray-300 text-accent-500" />
                                     Remote OK
                                 </label>
                             </div>
@@ -96,7 +96,7 @@ const submit = () => {
                                 <input v-model="form.contact_email" type="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" />
                             </div>
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit Job Listing</button>
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit Job Listing</button>
                     </form>
                 </div>
             </div>

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -23,11 +24,22 @@ class MemberApprovedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
+        if ($template = EmailTemplate::render('welcome', ['name' => $notifiable->name])) {
+            $mail = (new MailMessage)->subject($template['subject']);
+            foreach (preg_split('/\r\n|\r|\n/', $template['body']) as $line) {
+                $mail->line($line);
+            }
+
+            return $mail->action('View Dashboard', url('/dashboard'));
+        }
+
+        $mail = (new MailMessage)->action('View Dashboard', url('/dashboard'));
+
+        // Fallback if the template has been deleted.
+        return $mail
             ->subject('Your Profile Has Been Approved!')
             ->greeting('Welcome, ' . $notifiable->name . '!')
             ->line('Your alumni profile has been approved. You now have full access to the platform.')
-            ->action('View Dashboard', url('/dashboard'))
             ->line('Thank you for joining our alumni community!');
     }
 

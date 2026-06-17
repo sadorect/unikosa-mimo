@@ -47,7 +47,7 @@ const totalResults = () => {
     <div class="relative" @focusout="close">
         <div class="relative">
             <input v-model="query" type="text" placeholder="Search members, jobs, events, blog..."
-                class="w-full border-gray-300 rounded-full shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-gray-700 dark:border-gray-600 pl-10 text-sm" />
+                class="w-full border-gray-300 rounded-full shadow-sm focus:border-accent-500 focus:ring-accent-500 dark:bg-gray-700 dark:border-gray-600 pl-10 text-sm" />
             <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>

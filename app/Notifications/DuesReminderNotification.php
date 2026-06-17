@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\EmailTemplate;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -28,6 +29,22 @@ class DuesReminderNotification extends Notification implements ShouldQueue
     {
         $formattedAmount = number_format($this->amount / 100, 2);
 
+        $template = EmailTemplate::render('dues_reminder', [
+            'due_name' => $this->dueName,
+            'currency' => $this->currency,
+            'amount' => $formattedAmount,
+        ]);
+
+        if ($template) {
+            $mail = (new MailMessage)->subject($template['subject']);
+            foreach (preg_split('/\r\n|\r|\n/', $template['body']) as $line) {
+                $mail->line($line);
+            }
+
+            return $mail->action('Pay Now', url('/dashboard'));
+        }
+
+        // Fallback if the template has been deleted.
         return (new MailMessage)
             ->subject('Dues Reminder: ' . $this->dueName)
             ->line('This is a friendly reminder about your outstanding dues.')

@@ -10,7 +10,7 @@ defineProps({ business: Object });
         <Head :title="business.name" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('business.index')" class="text-amber-600 hover:text-amber-700 text-sm">Business Directory</Link>
+                <Link :href="route('business.index')" class="text-accent-600 hover:text-accent-700 text-sm">Business Directory</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm">{{ business.name }}</span>
             </div>
@@ -27,11 +27,11 @@ defineProps({ business: Object });
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-2">
                         <div v-if="business.website" class="text-sm">
                             <span class="text-gray-500">Website:</span>
-                            <a :href="business.website" target="_blank" class="text-amber-600 hover:text-amber-700 ml-2">{{ business.website }}</a>
+                            <a :href="business.website" target="_blank" class="text-accent-600 hover:text-accent-700 ml-2">{{ business.website }}</a>
                         </div>
                         <div v-if="business.contact_email" class="text-sm">
                             <span class="text-gray-500">Email:</span>
-                            <a :href="'mailto:' + business.contact_email" class="text-amber-600 hover:text-amber-700 ml-2">{{ business.contact_email }}</a>
+                            <a :href="'mailto:' + business.contact_email" class="text-accent-600 hover:text-accent-700 ml-2">{{ business.contact_email }}</a>
                         </div>
                         <div v-if="business.contact_phone" class="text-sm">
                             <span class="text-gray-500">Phone:</span>

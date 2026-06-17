@@ -5,12 +5,17 @@ use App\Http\Controllers\Api\V1\DirectoryController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\JobController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\ClaimProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Profile claiming (public): locate an imported record, then email an OTP.
+    Route::post('/claim-profile/search', [ClaimProfileController::class, 'search']);
+    Route::post('/claim-profile/send-otp', [ClaimProfileController::class, 'sendOtp']);
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);

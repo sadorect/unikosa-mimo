@@ -28,10 +28,10 @@ const progressPercent = (campaign) => {
                                     <span>{{ campaign.currency }} {{ (campaign.target_amount / 100).toFixed(0) }}</span>
                                 </div>
                                 <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                                    <div class="bg-amber-500 h-2 rounded-full" :style="{ width: progressPercent(campaign) + '%' }"></div>
+                                    <div class="bg-accent-500 h-2 rounded-full" :style="{ width: progressPercent(campaign) + '%' }"></div>
                                 </div>
                             </div>
-                            <Link :href="route('campaigns.show', campaign)" class="block text-center bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded">
+                            <Link :href="route('campaigns.show', campaign)" class="block text-center bg-accent-500 hover:bg-accent-600 text-white font-medium py-2 px-4 rounded">
                                 Contribute
                             </Link>
                         </div>

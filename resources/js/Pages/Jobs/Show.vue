@@ -26,7 +26,7 @@ const submitApplication = () => {
         <Head :title="job.title" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('jobs.index')" class="text-amber-600 hover:text-amber-700 text-sm">Jobs</Link>
+                <Link :href="route('jobs.index')" class="text-accent-600 hover:text-accent-700 text-sm">Jobs</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm truncate">{{ job.title }}</span>
             </div>
@@ -61,7 +61,7 @@ const submitApplication = () => {
                         </div>
 
                         <div v-if="job.contact_email" class="text-sm text-gray-500 mb-4">
-                            Contact: <a :href="'mailto:' + job.contact_email" class="text-amber-600 hover:text-amber-700">{{ job.contact_email }}</a>
+                            Contact: <a :href="'mailto:' + job.contact_email" class="text-accent-600 hover:text-accent-700">{{ job.contact_email }}</a>
                         </div>
 
                         <div v-if="job.application_url" class="mb-4">
@@ -71,7 +71,7 @@ const submitApplication = () => {
                         </div>
 
                         <div v-if="!hasApplied && !job.application_url" class="mb-4">
-                            <button @click="showApply = !showApply" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded">
+                            <button @click="showApply = !showApply" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-4 py-2 rounded">
                                 Apply Now
                             </button>
                         </div>
@@ -92,9 +92,9 @@ const submitApplication = () => {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">CV/Resume (PDF, DOC, DOCX)</label>
                             <input type="file" @change="e => applyForm.cv = e.target.files[0]" accept=".pdf,.doc,.docx"
-                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700" />
+                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-accent-50 file:text-accent-700" />
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded" :disabled="applyForm.processing">
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded" :disabled="applyForm.processing">
                             Submit Application
                         </button>
                     </form>

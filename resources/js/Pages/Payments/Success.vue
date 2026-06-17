@@ -37,7 +37,7 @@ const downloadReceipt = () => {
                     </div>
 
                     <div class="flex gap-3 justify-center">
-                        <button @click="downloadReceipt" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded">
+                        <button @click="downloadReceipt" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-4 py-2 rounded">
                             Download Receipt
                         </button>
                         <button @click="router.visit(route('dashboard'))" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium px-4 py-2 rounded">

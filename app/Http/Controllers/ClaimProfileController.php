@@ -25,11 +25,16 @@ class ClaimProfileController extends Controller
             'set_id' => 'nullable|exists:sets,id',
         ]);
 
+        // Note: use input('query'), not $request->query (the reserved InputBag).
+        $term = $request->input('query');
+
+        $like = '%' . strtolower($term) . '%';
+
         $query = User::where('imported', true)
             ->where('account_claimed', false)
-            ->where(function ($q) use ($request) {
-                $q->where('email', 'ilike', '%' . $request->query . '%')
-                  ->orWhere('name', 'ilike', '%' . $request->query . '%');
+            ->where(function ($q) use ($like) {
+                $q->whereRaw('LOWER(email) LIKE ?', [$like])
+                  ->orWhereRaw('LOWER(name) LIKE ?', [$like]);
             });
 
         if ($request->set_id) {
@@ -56,7 +61,8 @@ class ClaimProfileController extends Controller
             ->firstOrFail();
 
         $otp = Str::random(6);
-        $user->update(['remember_token' => 'claim_' . $otp]);
+        // remember_token is guarded, so forceFill to persist the OTP marker.
+        $user->forceFill(['remember_token' => 'claim_' . $otp])->save();
 
         \Illuminate\Support\Facades\Mail::to($user->email)->send(
             new \App\Mail\ClaimProfileOtp($user, $otp)
@@ -82,13 +88,14 @@ class ClaimProfileController extends Controller
             return response()->json(['message' => 'Invalid OTP.'], 422);
         }
 
-        $user->update([
+        // remember_token and email_verified_at are guarded, so forceFill them.
+        $user->forceFill([
             'password' => Hash::make($request->password),
             'account_claimed' => true,
             'claimed_at' => now(),
             'remember_token' => null,
             'email_verified_at' => now(),
-        ]);
+        ])->save();
 
         $user->assignRole('member');
 

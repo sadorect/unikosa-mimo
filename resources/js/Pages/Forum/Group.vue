@@ -10,7 +10,7 @@ defineProps({ group: Object, posts: Object });
         <Head :title="group.name" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('forum.index')" class="text-amber-600 hover:text-amber-700 text-sm">Forum</Link>
+                <Link :href="route('forum.index')" class="text-accent-600 hover:text-accent-700 text-sm">Forum</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm">{{ group.name }}</span>
             </div>

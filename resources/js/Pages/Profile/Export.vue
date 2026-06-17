@@ -35,7 +35,7 @@ const exportData = () => {
                     </div>
 
                     <button @click="exportData"
-                        class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-3 rounded">
+                        class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-3 rounded">
                         Download My Data (JSON)
                     </button>
                 </div>
