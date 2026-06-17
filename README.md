@@ -62,7 +62,16 @@ After seeding, the following users are created:
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | admin@unikosa.org | password |
-| Member | john@example.com | password |
+| Set Representative | setrep@unikosa.org | password |
+| Chapter Head | chapter@unikosa.org | password |
+| Content Moderator | moderator@unikosa.org | password |
+| Finance Admin | finance@unikosa.org | password |
+| Member (approved) | john@example.com | password |
+| Member (pending) | jane@example.com | password |
+
+The staff accounts can sign in to the admin panel at `/admin`; the member
+accounts show the authenticated member-facing experience. `jane@example.com`
+is left in `pending` status to preview the pre-approval state.
 
 ## Roles & Permissions
 

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +14,11 @@ class AlumniJob extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'alumni_jobs';
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => HtmlSanitizer::clean($value));
+    }
 
     protected $fillable = [
         'user_id', 'listing_type', 'title', 'company', 'description', 'type', 'location',

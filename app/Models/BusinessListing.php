@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,11 @@ class BusinessListing extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['user_id', 'name', 'slug', 'description', 'category', 'website', 'contact_email', 'contact_phone', 'logo', 'status'];
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => HtmlSanitizer::clean($value));
+    }
 
     protected static function boot(): void
     {

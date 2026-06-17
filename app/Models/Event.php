@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +20,11 @@ class Event extends Model
         'livestream_url', 'start_at', 'end_at', 'is_paid',
         'ticket_price', 'ticket_currency', 'chapter_id', 'created_by', 'capacity',
     ];
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => HtmlSanitizer::clean($value));
+    }
 
     protected $casts = [
         'is_virtual' => 'boolean',

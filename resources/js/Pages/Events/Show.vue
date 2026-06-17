@@ -55,7 +55,7 @@ const goingCount = props.event.rsvps?.filter(r => r.pivot?.status === 'going').l
                             </div>
                         </div>
 
-                        <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-8">{{ event.description }}</div>
+                        <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 mb-8" v-html="event.description"></div>
 
                         <div v-if="event.livestream_url" class="mb-6">
                             <a :href="event.livestream_url" target="_blank" class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-4 py-2 rounded inline-block">

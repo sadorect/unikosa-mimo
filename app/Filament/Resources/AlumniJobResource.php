@@ -23,7 +23,7 @@ class AlumniJobResource extends Resource
         return $form->schema([
             Forms\Components\TextInput::make('title')->required(),
             Forms\Components\TextInput::make('company'),
-            Forms\Components\Textarea::make('description')->required(),
+            Forms\Components\RichEditor::make('description')->required()->columnSpanFull(),
             Forms\Components\Select::make('type')->options([
                 'full_time' => 'Full Time', 'part_time' => 'Part Time', 'contract' => 'Contract',
                 'internship' => 'Internship', 'remote' => 'Remote',

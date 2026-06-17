@@ -8,6 +8,9 @@ defineProps({ jobs: Object, filters: Object });
 const search = ref(filters?.search || '');
 const type = ref(filters?.type || '');
 
+// description is rich HTML; show a plain-text preview in the list.
+const textPreview = (html) => (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
 const types = [
     { value: '', label: 'All Types' },
     { value: 'full_time', label: 'Full Time' },
@@ -57,7 +60,7 @@ const filter = () => {
                                 {{ job.type?.replace('_', ' ') }}
                             </span>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">{{ job.description }}</p>
+                        <p class="text-gray-600 dark:text-gray-400 mt-3 line-clamp-2">{{ textPreview(job.description) }}</p>
                         <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
                             <span>Posted by {{ job.author?.name }}</span>
                             <span v-if="job.salary_min || job.salary_max">

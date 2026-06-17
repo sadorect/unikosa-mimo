@@ -8,6 +8,9 @@ defineProps({ businesses: Object, categories: Array, filters: Object });
 const search = ref(filters?.search || '');
 const selectedCategory = ref(filters?.category || '');
 
+// description is rich HTML; show a plain-text preview in the list.
+const textPreview = (html) => (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
 const filter = () => {
     router.get(route('business.index'), { search: search.value, category: selectedCategory.value }, { preserveState: true, replace: true });
 };
@@ -40,7 +43,7 @@ const filter = () => {
                             <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ biz.name }}</h3>
                             <span class="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">{{ biz.category }}</span>
                         </div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">{{ biz.description }}</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">{{ textPreview(biz.description) }}</p>
                         <div class="text-xs text-gray-500">Listed by {{ biz.owner?.name }}</div>
                         <div v-if="biz.website" class="text-xs text-accent-600 mt-1">{{ biz.website }}</div>
                     </Link>

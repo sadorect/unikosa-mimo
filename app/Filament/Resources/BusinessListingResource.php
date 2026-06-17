@@ -21,7 +21,7 @@ class BusinessListingResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('name')->required(),
-            Forms\Components\Textarea::make('description')->required(),
+            Forms\Components\RichEditor::make('description')->required()->columnSpanFull(),
             Forms\Components\TextInput::make('category')->required(),
             Forms\Components\TextInput::make('website'),
             Forms\Components\TextInput::make('contact_email')->email(),

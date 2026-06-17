@@ -38,7 +38,7 @@ defineProps({ post: Object });
                                 {{ cat.name }}
                             </span>
                         </div>
-                        <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ post.body }}</div>
+                        <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300" v-html="post.body"></div>
                     </div>
                 </article>
             </div>

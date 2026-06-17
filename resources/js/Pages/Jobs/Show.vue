@@ -53,7 +53,7 @@ const submitApplication = () => {
                         <span>{{ job.views_count || 0 }} views</span>
                     </div>
 
-                    <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-8">{{ job.description }}</div>
+                    <div class="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 mb-8" v-html="job.description"></div>
 
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                         <div class="text-sm text-gray-500 mb-4">
