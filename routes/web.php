@@ -32,7 +32,9 @@ Route::get('/', function () {
 });
 
 Route::get('/claim-profile', [ClaimProfileController::class, 'show'])->name('claim-profile.show');
-Route::post('/claim-profile/verify', [ClaimProfileController::class, 'verifyOtp'])->name('claim-profile.verify');
+Route::post('/claim-profile/verify', [ClaimProfileController::class, 'verifyOtp'])
+    ->middleware('throttle:5,1')
+    ->name('claim-profile.verify');
 
 Route::get('/transparency', [TransparencyController::class, 'index'])->name('transparency.index');
 
@@ -107,18 +109,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/payments/campaign/{campaign}', [PaymentController::class, 'payCampaign'])->name('payments.campaign');
     Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
     Route::get('/payments/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
+    Route::post('/payments/verify/paystack', [PaymentController::class, 'verifyPaystack'])->name('payments.verify.paystack');
 
     Route::get('/profile', function () { return inertia('Profile/Edit'); })->name('profile.edit');
     Route::get('/profile/export', [DataExportController::class, 'index'])->name('profile.export');
     Route::get('/profile/export/download', [DataExportController::class, 'exportMyData'])->name('profile.export.download');
 });
 
-Route::post('/payments/verify/paystack', [PaymentController::class, 'verifyPaystack'])->name('payments.verify.paystack');
-Route::post('/payments/webhook/stripe', [PaymentController::class, 'stripeWebhook'])->name('payments.webhook.stripe');
-
 Route::get('/search', [SearchController::class, 'global'])->name('search.global');
 
-Route::get('/admin/financial-reports', [FinancialReportController::class, 'index'])->name('admin.reports.index');
-Route::get('/admin/financial-reports/summary', [FinancialReportController::class, 'summary'])->name('admin.reports.summary');
-Route::get('/admin/financial-reports/export', [FinancialReportController::class, 'export'])->name('admin.reports.export');
-Route::get('/admin/export-users', [DataExportController::class, 'adminExportUsers'])->name('admin.export.users');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::middleware(fn ($req, $next) => $req->user()?->hasRole('super_admin') ? $next($req) : abort(403))->group(function () {
+        Route::get('/admin/financial-reports', [FinancialReportController::class, 'index'])->name('admin.reports.index');
+        Route::get('/admin/financial-reports/summary', [FinancialReportController::class, 'summary'])->name('admin.reports.summary');
+        Route::get('/admin/financial-reports/export', [FinancialReportController::class, 'export'])->name('admin.reports.export');
+        Route::get('/admin/export-users', [DataExportController::class, 'adminExportUsers'])->name('admin.export.users');
+    });
+});

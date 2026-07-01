@@ -60,9 +60,9 @@ class ClaimProfileController extends Controller
             ->where('account_claimed', false)
             ->firstOrFail();
 
-        $otp = Str::random(6);
-        // remember_token is guarded, so forceFill to persist the OTP marker.
-        $user->forceFill(['remember_token' => 'claim_' . $otp])->save();
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        // Store as "claim_{otp}_{unix_timestamp}" so we can enforce a 15-minute expiry.
+        $user->forceFill(['remember_token' => 'claim_' . $otp . '_' . now()->timestamp])->save();
 
         \Illuminate\Support\Facades\Mail::to($user->email)->send(
             new \App\Mail\ClaimProfileOtp($user, $otp)
@@ -84,8 +84,17 @@ class ClaimProfileController extends Controller
             ->where('account_claimed', false)
             ->firstOrFail();
 
-        if ($user->remember_token !== 'claim_' . $request->otp) {
+        // Token format: "claim_{otp}_{unix_timestamp}"
+        $parts = explode('_', (string) $user->remember_token, 3);
+        $tokenOtp  = $parts[1] ?? null;
+        $createdAt = isset($parts[2]) ? (int) $parts[2] : 0;
+
+        if ($tokenOtp !== $request->otp) {
             return response()->json(['message' => 'Invalid OTP.'], 422);
+        }
+
+        if (now()->timestamp - $createdAt > 900) {
+            return response()->json(['message' => 'OTP has expired. Please request a new one.'], 422);
         }
 
         // remember_token and email_verified_at are guarded, so forceFill them.

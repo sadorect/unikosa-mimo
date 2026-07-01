@@ -6,16 +6,22 @@ use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\JobController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\ClaimProfileController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
+
+// Stripe webhook: must be outside CSRF middleware; signature is verified inside the handler.
+Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook'])
+    ->name('payments.webhook.stripe');
 
 Route::prefix('v1')->group(function () {
 
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
     // Profile claiming (public): locate an imported record, then email an OTP.
     Route::post('/claim-profile/search', [ClaimProfileController::class, 'search']);
-    Route::post('/claim-profile/send-otp', [ClaimProfileController::class, 'sendOtp']);
+    Route::post('/claim-profile/send-otp', [ClaimProfileController::class, 'sendOtp'])
+        ->middleware('throttle:3,1');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [AuthController::class, 'user']);

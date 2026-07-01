@@ -49,6 +49,15 @@ services:
     networks:
       - unikosa-network
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: unikosa-mailpit
+    restart: unless-stopped
+    ports:
+      - "8026:8025"
+    networks:
+      - unikosa-network
+
   postgres:
     image: postgres:16-alpine
     container_name: unikosa-postgres
@@ -56,9 +65,7 @@ services:
     environment:
       POSTGRES_DB: unikosa
       POSTGRES_USER: unikosa
-      POSTGRES_PASSWORD: secret
-    ports:
-      - "5434:5432"
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -73,8 +80,10 @@ services:
     image: redis:7-alpine
     container_name: unikosa-redis
     restart: unless-stopped
-    ports:
-      - "6382:6379"
+    command: >
+      sh -c '[ -n "$$REDIS_PASSWORD" ] && exec redis-server --requirepass "$$REDIS_PASSWORD" || exec redis-server'
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     volumes:
       - redis_data:/data
     networks:
