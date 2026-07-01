@@ -49,7 +49,7 @@ const features = [
 ];
 
 const colorMap = {
-    amber: { bg: 'bg-amber-50 dark:bg-amber-900/20', icon: 'text-amber-500', border: 'border-amber-200 dark:border-amber-800' },
+    amber: { bg: 'bg-accent-50 dark:bg-accent-900/20', icon: 'text-accent-500', border: 'border-accent-200 dark:border-accent-800' },
     blue:  { bg: 'bg-blue-50 dark:bg-blue-900/20',   icon: 'text-blue-500',  border: 'border-blue-200 dark:border-blue-800' },
     green: { bg: 'bg-green-50 dark:bg-green-900/20', icon: 'text-green-500', border: 'border-green-200 dark:border-green-800' },
     purple:{ bg: 'bg-purple-50 dark:bg-purple-900/20',icon:'text-purple-500',border: 'border-purple-200 dark:border-purple-800' },
@@ -66,31 +66,31 @@ const colorMap = {
         <!-- ── Navigation ── -->
         <nav class="fixed top-0 inset-x-0 z-50 bg-white/90 dark:bg-gray-900/90 backdrop-blur border-b border-gray-100 dark:border-gray-800">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-                <Link href="/" class="text-2xl font-bold text-amber-500 tracking-wide">
+                <Link href="/" class="text-2xl font-bold text-accent-500 tracking-wide">
                     {{ $page.props.settings?.site_name || 'UNIKOSA' }}
                 </Link>
 
                 <!-- Desktop nav -->
                 <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600 dark:text-gray-300">
-                    <a href="#features" class="hover:text-amber-500 transition">Features</a>
-                    <a href="#about" class="hover:text-amber-500 transition">About</a>
-                    <Link :href="route('transparency.index')" class="hover:text-amber-500 transition">Transparency</Link>
+                    <a href="#features" class="hover:text-accent-500 transition">Features</a>
+                    <a href="#about" class="hover:text-accent-500 transition">About</a>
+                    <Link :href="route('transparency.index')" class="hover:text-accent-500 transition">Transparency</Link>
                 </div>
 
                 <div class="hidden md:flex items-center gap-3">
                     <template v-if="$page.props.auth.user">
                         <Link :href="route('dashboard')"
-                            class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm">
+                            class="bg-accent-500 hover:bg-accent-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm">
                             Dashboard
                         </Link>
                     </template>
                     <template v-else>
                         <Link :href="route('login')"
-                            class="text-gray-600 dark:text-gray-300 hover:text-amber-500 transition text-sm font-medium px-4 py-2">
+                            class="text-gray-600 dark:text-gray-300 hover:text-accent-500 transition text-sm font-medium px-4 py-2">
                             Sign In
                         </Link>
                         <Link :href="route('register')"
-                            class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm">
+                            class="bg-accent-500 hover:bg-accent-600 text-white px-5 py-2 rounded-full text-sm font-semibold transition shadow-sm">
                             Join the Network
                         </Link>
                     </template>
@@ -107,13 +107,13 @@ const colorMap = {
 
             <!-- Mobile menu -->
             <div v-if="mobileOpen" class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 py-4 space-y-3">
-                <a href="#features" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-amber-500">Features</a>
-                <a href="#about" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-amber-500">About</a>
-                <Link :href="route('transparency.index')" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-amber-500">Transparency</Link>
+                <a href="#features" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Features</a>
+                <a href="#about" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">About</a>
+                <Link :href="route('transparency.index')" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Transparency</Link>
                 <div class="pt-2 flex gap-3">
-                    <Link v-if="!$page.props.auth.user" :href="route('login')" class="flex-1 text-center border border-amber-500 text-amber-600 py-2 rounded-full text-sm font-semibold">Sign In</Link>
-                    <Link v-if="!$page.props.auth.user" :href="route('register')" class="flex-1 text-center bg-amber-500 text-white py-2 rounded-full text-sm font-semibold">Join Now</Link>
-                    <Link v-if="$page.props.auth.user" :href="route('dashboard')" class="flex-1 text-center bg-amber-500 text-white py-2 rounded-full text-sm font-semibold">Dashboard</Link>
+                    <Link v-if="!$page.props.auth.user" :href="route('login')" class="flex-1 text-center border border-accent-500 text-accent-600 py-2 rounded-full text-sm font-semibold">Sign In</Link>
+                    <Link v-if="!$page.props.auth.user" :href="route('register')" class="flex-1 text-center bg-accent-500 text-white py-2 rounded-full text-sm font-semibold">Join Now</Link>
+                    <Link v-if="$page.props.auth.user" :href="route('dashboard')" class="flex-1 text-center bg-accent-500 text-white py-2 rounded-full text-sm font-semibold">Dashboard</Link>
                 </div>
             </div>
         </nav>
@@ -121,20 +121,20 @@ const colorMap = {
         <!-- ── Hero ── -->
         <section class="relative pt-24 pb-20 overflow-hidden">
             <!-- Background gradient -->
-            <div class="absolute inset-0 bg-linear-to-br from-amber-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pointer-events-none"></div>
-            <div class="absolute -top-24 -right-24 w-96 h-96 bg-amber-200/30 dark:bg-amber-900/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute inset-0 bg-linear-to-br from-accent-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 pointer-events-none"></div>
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-accent-200/30 dark:bg-accent-900/20 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-12 -left-12 w-72 h-72 bg-blue-200/30 dark:bg-blue-900/20 rounded-full blur-3xl pointer-events-none"></div>
 
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-12">
                 <!-- Text -->
                 <div class="flex-1 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
-                        <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse"></span>
+                    <div class="inline-flex items-center gap-2 bg-accent-100 dark:bg-accent-900/40 text-accent-700 dark:text-accent-400 text-xs font-semibold px-3 py-1 rounded-full mb-6">
+                        <span class="w-1.5 h-1.5 bg-accent-500 rounded-full animate-pulse"></span>
                         Global Alumni Network
                     </div>
                     <h1 class="text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
                         Connecting<br/>
-                        <span class="text-amber-500">{{ $page.props.settings?.site_name || 'UNIKOSA' }}</span><br/>
+                        <span class="text-accent-500">{{ $page.props.settings?.site_name || 'UNIKOSA' }}</span><br/>
                         Alumni Worldwide
                     </h1>
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0">
@@ -144,22 +144,22 @@ const colorMap = {
                     <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
                         <template v-if="$page.props.auth.user">
                             <Link :href="route('dashboard')"
-                                class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transition text-base">
+                                class="bg-accent-500 hover:bg-accent-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transition text-base">
                                 Go to Dashboard
                             </Link>
                         </template>
                         <template v-else>
                             <Link :href="route('register')"
-                                class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transition text-base">
+                                class="bg-accent-500 hover:bg-accent-600 text-white font-bold px-8 py-3 rounded-full shadow-lg transition text-base">
                                 Join the Network
                             </Link>
                             <Link :href="route('login')"
-                                class="border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-500 font-bold px-8 py-3 rounded-full transition text-base">
+                                class="border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-accent-500 hover:text-accent-500 font-bold px-8 py-3 rounded-full transition text-base">
                                 Sign In
                             </Link>
                         </template>
                         <Link :href="route('claim-profile.show')"
-                            class="text-gray-500 dark:text-gray-400 underline underline-offset-2 text-sm self-center hover:text-amber-500 transition">
+                            class="text-gray-500 dark:text-gray-400 underline underline-offset-2 text-sm self-center hover:text-accent-500 transition">
                             Already a member? Claim your profile
                         </Link>
                     </div>
@@ -168,8 +168,8 @@ const colorMap = {
                 <!-- Stats card -->
                 <div class="shrink-0 w-full lg:w-80">
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700 p-6 grid grid-cols-2 gap-4">
-                        <div class="text-center p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-                            <div class="text-3xl font-extrabold text-amber-600 dark:text-amber-400">
+                        <div class="text-center p-4 bg-accent-50 dark:bg-accent-900/20 rounded-xl">
+                            <div class="text-3xl font-extrabold text-accent-600 dark:text-accent-400">
                                 {{ (stats?.members || 0).toLocaleString() }}+
                             </div>
                             <div class="text-xs text-gray-500 mt-1 font-medium">Verified Members</div>
@@ -232,11 +232,11 @@ const colorMap = {
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                     <!-- Left: decorative grid of accent blocks -->
                     <div class="grid grid-cols-3 gap-3">
-                        <div class="col-span-2 bg-amber-500 rounded-2xl h-40 flex items-end p-4">
+                        <div class="col-span-2 bg-accent-500 rounded-2xl h-40 flex items-end p-4">
                             <span class="text-white font-bold text-lg">One School, Many Nations</span>
                         </div>
                         <div class="bg-gray-100 dark:bg-gray-700 rounded-2xl h-40 flex items-center justify-center">
-                            <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-10 h-10 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
@@ -246,7 +246,7 @@ const colorMap = {
                             </svg>
                         </div>
                         <div class="col-span-2 bg-gray-900 dark:bg-gray-700 rounded-2xl h-40 flex items-end p-4">
-                            <span class="text-amber-400 font-bold text-lg">Organized. Transparent. Connected.</span>
+                            <span class="text-accent-400 font-bold text-lg">Organized. Transparent. Connected.</span>
                         </div>
                     </div>
 
@@ -254,7 +254,7 @@ const colorMap = {
                     <div>
                         <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-6">
                             Our mission is simple:<br/>
-                            <span class="text-amber-500">keep the family together.</span>
+                            <span class="text-accent-500">keep the family together.</span>
                         </h2>
                         <div class="space-y-4 text-gray-600 dark:text-gray-400">
                             <p>
@@ -269,7 +269,7 @@ const colorMap = {
                             </p>
                             <p>
                                 All financial activities are published in our
-                                <Link :href="route('transparency.index')" class="text-amber-600 hover:underline">
+                                <Link :href="route('transparency.index')" class="text-accent-600 hover:underline">
                                     public transparency reports
                                 </Link>
                                 so every member knows exactly how contributions are used.
@@ -277,11 +277,11 @@ const colorMap = {
                         </div>
                         <div class="mt-8 flex gap-4">
                             <Link :href="route('register')"
-                                class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-full transition">
+                                class="bg-accent-500 hover:bg-accent-600 text-white font-semibold px-6 py-3 rounded-full transition">
                                 Join Today
                             </Link>
                             <Link :href="route('transparency.index')"
-                                class="border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-amber-500 hover:text-amber-500 font-semibold px-6 py-3 rounded-full transition">
+                                class="border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-accent-500 hover:text-accent-500 font-semibold px-6 py-3 rounded-full transition">
                                 View Reports
                             </Link>
                         </div>
@@ -301,7 +301,7 @@ const colorMap = {
                         { title: 'Get Verified', desc: 'Your set rep or an admin reviews your profile and approves your membership.' },
                         { title: 'Join the Community', desc: 'Access the full platform — directory, events, forum, jobs, campaigns and more.' }
                     ]" :key="i" class="relative">
-                        <div class="w-10 h-10 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center mx-auto mb-4 text-lg">
+                        <div class="w-10 h-10 rounded-full bg-accent-500 text-white font-bold flex items-center justify-center mx-auto mb-4 text-lg">
                             {{ i + 1 }}
                         </div>
                         <h3 class="font-semibold text-gray-900 dark:text-white mb-2">{{ step.title }}</h3>
@@ -312,28 +312,28 @@ const colorMap = {
         </section>
 
         <!-- ── CTA Banner ── -->
-        <section class="py-16 bg-amber-500">
+        <section class="py-16 bg-accent-500">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-3xl lg:text-4xl font-extrabold text-white mb-4">
                     Ready to reconnect with your alma mater?
                 </h2>
-                <p class="text-amber-100 mb-8 text-lg">
+                <p class="text-accent-100 mb-8 text-lg">
                     Thousands of alumni are already using the platform. Your network is waiting.
                 </p>
                 <div class="flex flex-wrap gap-4 justify-center">
                     <template v-if="$page.props.auth.user">
                         <Link :href="route('dashboard')"
-                            class="bg-white text-amber-600 hover:bg-amber-50 font-bold px-8 py-3 rounded-full transition shadow-lg text-base">
+                            class="bg-white text-accent-600 hover:bg-accent-50 font-bold px-8 py-3 rounded-full transition shadow-lg text-base">
                             Go to Dashboard
                         </Link>
                     </template>
                     <template v-else>
                         <Link :href="route('register')"
-                            class="bg-white text-amber-600 hover:bg-amber-50 font-bold px-8 py-3 rounded-full transition shadow-lg text-base">
+                            class="bg-white text-accent-600 hover:bg-accent-50 font-bold px-8 py-3 rounded-full transition shadow-lg text-base">
                             Create Free Account
                         </Link>
                         <Link :href="route('claim-profile.show')"
-                            class="border-2 border-white text-white hover:bg-amber-600 font-bold px-8 py-3 rounded-full transition text-base">
+                            class="border-2 border-white text-white hover:bg-accent-600 font-bold px-8 py-3 rounded-full transition text-base">
                             Claim Existing Profile
                         </Link>
                     </template>
@@ -346,7 +346,7 @@ const colorMap = {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
                     <div class="md:col-span-2">
-                        <div class="text-2xl font-bold text-amber-500 mb-3">
+                        <div class="text-2xl font-bold text-accent-500 mb-3">
                             {{ $page.props.settings?.site_name || 'UNIKOSA' }}
                         </div>
                         <p class="text-sm leading-relaxed">
@@ -357,19 +357,19 @@ const colorMap = {
                     <div>
                         <h4 class="text-white font-semibold mb-3 text-sm">Platform</h4>
                         <ul class="space-y-2 text-sm">
-                            <li><Link :href="route('register')" class="hover:text-amber-400 transition">Join the Network</Link></li>
-                            <li><Link :href="route('login')" class="hover:text-amber-400 transition">Sign In</Link></li>
-                            <li><Link :href="route('claim-profile.show')" class="hover:text-amber-400 transition">Claim Profile</Link></li>
-                            <li><Link :href="route('transparency.index')" class="hover:text-amber-400 transition">Transparency</Link></li>
+                            <li><Link :href="route('register')" class="hover:text-accent-400 transition">Join the Network</Link></li>
+                            <li><Link :href="route('login')" class="hover:text-accent-400 transition">Sign In</Link></li>
+                            <li><Link :href="route('claim-profile.show')" class="hover:text-accent-400 transition">Claim Profile</Link></li>
+                            <li><Link :href="route('transparency.index')" class="hover:text-accent-400 transition">Transparency</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h4 class="text-white font-semibold mb-3 text-sm">Members</h4>
                         <ul class="space-y-2 text-sm">
-                            <li><Link :href="route('directory')" class="hover:text-amber-400 transition">Directory</Link></li>
-                            <li><Link :href="route('events.index')" class="hover:text-amber-400 transition">Events</Link></li>
-                            <li><Link :href="route('forum.index')" class="hover:text-amber-400 transition">Forum</Link></li>
-                            <li><Link :href="route('jobs.index')" class="hover:text-amber-400 transition">Jobs</Link></li>
+                            <li><Link :href="route('directory')" class="hover:text-accent-400 transition">Directory</Link></li>
+                            <li><Link :href="route('events.index')" class="hover:text-accent-400 transition">Events</Link></li>
+                            <li><Link :href="route('forum.index')" class="hover:text-accent-400 transition">Forum</Link></li>
+                            <li><Link :href="route('jobs.index')" class="hover:text-accent-400 transition">Jobs</Link></li>
                         </ul>
                     </div>
                 </div>

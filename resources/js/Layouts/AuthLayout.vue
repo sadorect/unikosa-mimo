@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import ThemeToggle from '@/Components/ThemeToggle.vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -25,7 +26,7 @@ const showingNavigationDropdown = ref(false);
                     <div class="flex items-center min-w-0">
                         <div class="shrink-0 flex items-center">
                             <Link :href="route('dashboard')">
-                                <ApplicationLogo class="block h-9 w-auto fill-current text-amber-500" />
+                                <ApplicationLogo class="block h-9 w-auto fill-current text-accent-500" />
                             </Link>
                         </div>
                         <div class="hidden lg:flex lg:items-center lg:ms-8 lg:space-x-1">
@@ -56,6 +57,7 @@ const showingNavigationDropdown = ref(false);
 
                     <!-- Right: bell + Sign Out (sm+) + hamburger (lg-) -->
                     <div class="flex items-center gap-3 shrink-0">
+                        <ThemeToggle />
                         <!-- Bell + Sign Out visible from sm -->
                         <div class="hidden sm:flex items-center gap-3">
                             <Link :href="route('notifications.index')" class="relative text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
@@ -66,7 +68,7 @@ const showingNavigationDropdown = ref(false);
                                 </span>
                             </Link>
                             <Link :href="route('logout')" method="post" as="button"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 transition whitespace-nowrap">
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white bg-accent-500 hover:bg-accent-600 transition whitespace-nowrap">
                                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                                 Sign Out
                             </Link>

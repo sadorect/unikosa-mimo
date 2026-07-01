@@ -10,7 +10,7 @@ defineProps({ job: Object });
         <Head title="Applications - {{ job.title }}" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('jobs.show', job.id)" class="text-amber-600 hover:text-amber-700 text-sm">{{ job.title }}</Link>
+                <Link :href="route('jobs.show', job.id)" class="text-accent-600 hover:text-accent-700 text-sm">{{ job.title }}</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm">Applications</span>
             </div>
@@ -46,7 +46,7 @@ defineProps({ job: Object });
                                         }">{{ app.status }}</span>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <a v-if="app.cv_path" :href="app.cv_path" target="_blank" class="text-amber-600 hover:text-amber-700 text-sm">Download</a>
+                                    <a v-if="app.cv_path" :href="app.cv_path" target="_blank" class="text-accent-600 hover:text-accent-700 text-sm">Download</a>
                                     <span v-else class="text-gray-400 text-sm">None</span>
                                 </td>
                             </tr>

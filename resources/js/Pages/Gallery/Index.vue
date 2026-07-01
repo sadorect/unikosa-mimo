@@ -25,7 +25,7 @@ defineProps({ albums: Object });
                         </div>
                         <div class="p-4">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ album.title }}</h3>
-                            <div v-if="album.event" class="text-xs text-amber-600 mt-1">{{ album.event.title }}</div>
+                            <div v-if="album.event" class="text-xs text-accent-600 mt-1">{{ album.event.title }}</div>
                         </div>
                     </Link>
                 </div>

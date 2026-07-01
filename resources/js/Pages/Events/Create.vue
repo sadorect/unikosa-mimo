@@ -15,7 +15,7 @@ defineProps({ events: Object });
                     <form @submit.prevent="$inertia.post(route('events.store'), form)" class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-                            <input v-model="form.title" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-gray-700" required>
+                            <input v-model="form.title" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 dark:bg-gray-700" required>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
@@ -27,7 +27,7 @@ defineProps({ events: Object });
                             <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Start At</label>
                             <input v-model="form.start_at" type="datetime-local" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" required></div>
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded">Create Event</button>
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded">Create Event</button>
                     </form>
                 </div>
             </div>

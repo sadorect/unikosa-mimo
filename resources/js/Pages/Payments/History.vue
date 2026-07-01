@@ -49,7 +49,7 @@ const statusBadge = (status) => {
                                 </td>
                                 <td class="px-6 py-4">
                                     <Link v-if="payment.status === 'successful'" :href="route('payments.receipt', payment.id)"
-                                        class="text-amber-600 hover:text-amber-700 text-sm">
+                                        class="text-accent-600 hover:text-accent-700 text-sm">
                                         Download
                                     </Link>
                                 </td>

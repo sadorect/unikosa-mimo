@@ -62,6 +62,31 @@ class SampleDataSeeder extends Seeder
             $member->assignRole('member');
         }
 
+        // One approved user per staff role so each access level can be previewed.
+        // All use the password "password".
+        $staff = [
+            ['email' => 'setrep@unikosa.org',    'name' => 'Set Rep User',           'role' => 'set_representative', 'graduating_set_id' => 2, 'chapter_id' => 1],
+            ['email' => 'chapter@unikosa.org',   'name' => 'Chapter Head User',      'role' => 'chapter_head',       'graduating_set_id' => 3, 'chapter_id' => 2],
+            ['email' => 'moderator@unikosa.org', 'name' => 'Content Moderator User', 'role' => 'content_moderator',  'graduating_set_id' => 4, 'chapter_id' => 1],
+            ['email' => 'finance@unikosa.org',   'name' => 'Finance Admin User',     'role' => 'finance_admin',      'graduating_set_id' => 5, 'chapter_id' => 1],
+        ];
+
+        foreach ($staff as $person) {
+            $user = User::firstOrCreate(['email' => $person['email']], [
+                'name' => $person['name'],
+                'password' => Hash::make('password'),
+                'status' => 'approved',
+                'graduating_set_id' => $person['graduating_set_id'],
+                'chapter_id' => $person['chapter_id'],
+                'country' => 'Nigeria',
+                'city' => 'Lagos',
+                'email_verified_at' => now(),
+            ]);
+            if (!$user->hasRole($person['role'])) {
+                $user->assignRole($person['role']);
+            }
+        }
+
         User::firstOrCreate(['email' => 'jane@example.com'], [
             'name' => 'Jane Smith',
             'password' => Hash::make('password'),

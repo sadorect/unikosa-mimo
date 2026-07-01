@@ -39,7 +39,7 @@ const submit = () => {
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categories</label>
                             <div class="mt-1 flex flex-wrap gap-2">
                                 <label v-for="cat in categories" :key="cat.id" class="inline-flex items-center gap-1 text-sm">
-                                    <input type="checkbox" :value="cat.id" v-model="form.categories" class="rounded border-gray-300 text-amber-500" />
+                                    <input type="checkbox" :value="cat.id" v-model="form.categories" class="rounded border-gray-300 text-accent-500" />
                                     {{ cat.name }}
                                 </label>
                             </div>
@@ -48,7 +48,7 @@ const submit = () => {
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Body</label>
                             <textarea v-model="form.body" rows="15" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" required></textarea>
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit for Review</button>
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit for Review</button>
                     </form>
                 </div>
             </div>

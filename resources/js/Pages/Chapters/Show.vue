@@ -10,7 +10,7 @@ defineProps({ chapter: Object, members: Object });
         <Head :title="chapter.name" />
         <template #header>
             <div class="flex items-center gap-2">
-                <Link :href="route('chapters.index')" class="text-amber-600 hover:text-amber-700 text-sm">Chapters</Link>
+                <Link :href="route('chapters.index')" class="text-accent-600 hover:text-accent-700 text-sm">Chapters</Link>
                 <span class="text-gray-400">/</span>
                 <span class="text-gray-700 dark:text-gray-300 text-sm">{{ chapter.name }}</span>
             </div>
@@ -30,7 +30,7 @@ defineProps({ chapter: Object, members: Object });
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="member in members.data" :key="member.id"
                         class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 font-bold">
+                        <div class="w-10 h-10 rounded-full bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center text-accent-600 font-bold">
                             {{ member.name.charAt(0) }}
                         </div>
                         <div>

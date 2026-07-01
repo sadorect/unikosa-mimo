@@ -32,9 +32,9 @@ const iconForType = (type) => {
             <div class="flex justify-between items-center">
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200">
                     Notifications
-                    <span v-if="unreadCount" class="ml-2 text-sm font-normal text-amber-600">({{ unreadCount }} unread)</span>
+                    <span v-if="unreadCount" class="ml-2 text-sm font-normal text-accent-600">({{ unreadCount }} unread)</span>
                 </h2>
-                <button v-if="unreadCount" @click="markAllRead" class="text-sm text-amber-600 hover:text-amber-700">Mark all as read</button>
+                <button v-if="unreadCount" @click="markAllRead" class="text-sm text-accent-600 hover:text-accent-700">Mark all as read</button>
             </div>
         </template>
         <div class="py-12">
@@ -45,7 +45,7 @@ const iconForType = (type) => {
                     </div>
                     <div v-for="notification in notifications.data" :key="notification.id"
                         class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer"
-                        :class="{ 'bg-amber-50/50 dark:bg-amber-900/10': !notification.read_at }"
+                        :class="{ 'bg-accent-50/50 dark:bg-accent-900/10': !notification.read_at }"
                         @click="!notification.read_at && markAsRead(notification.id)">
                         <div class="flex items-start gap-3">
                             <span class="text-xl mt-0.5">{{ iconForType(notification.data?.type) }}</span>
@@ -53,7 +53,7 @@ const iconForType = (type) => {
                                 <p class="text-sm text-gray-900 dark:text-gray-100">{{ notification.data?.message }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ notification.created_at }}</p>
                             </div>
-                            <div v-if="!notification.read_at" class="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0"></div>
+                            <div v-if="!notification.read_at" class="w-2 h-2 rounded-full bg-accent-500 mt-2 shrink-0"></div>
                         </div>
                     </div>
                 </div>

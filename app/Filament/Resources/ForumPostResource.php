@@ -21,7 +21,7 @@ class ForumPostResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('title')->required(),
-            Forms\Components\Textarea::make('body')->required(),
+            Forms\Components\Textarea::make('body')->required()->rows(6),
             Forms\Components\Select::make('status')->options([
                 'pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected',
             ])->required(),

@@ -1,3 +1,43 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
+
+/* Manual (class-based) dark mode so members can choose light/dark/auto,
+   instead of relying solely on prefers-color-scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Map the `accent` color utilities (bg-accent-500, text-accent-600, ...) to
+   runtime CSS variables. These are overridden at runtime from the admin
+   `accent_color` setting (see resources/js/theme.js); the :root defaults below
+   keep the original amber palette for SSR / no-JS / pre-hydration paint. */
+@theme inline {
+    --color-accent-50: var(--accent-50);
+    --color-accent-100: var(--accent-100);
+    --color-accent-200: var(--accent-200);
+    --color-accent-300: var(--accent-300);
+    --color-accent-400: var(--accent-400);
+    --color-accent-500: var(--accent-500);
+    --color-accent-600: var(--accent-600);
+    --color-accent-700: var(--accent-700);
+    --color-accent-800: var(--accent-800);
+    --color-accent-900: var(--accent-900);
+}
+
+:root {
+    --accent-50: #fffbeb;
+    --accent-100: #fef3c7;
+    --accent-200: #fde68a;
+    --accent-300: #fcd34d;
+    --accent-400: #fbbf24;
+    --accent-500: #f59e0b;
+    --accent-600: #d97706;
+    --accent-700: #b45309;
+    --accent-800: #92400e;
+    --accent-900: #78350f;
+
+    --font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+}

@@ -49,7 +49,7 @@ onMounted(fetchSummary);
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">To</label>
                             <input v-model="dateTo" type="date" class="border-gray-300 rounded-md shadow-sm dark:bg-gray-700" />
                         </div>
-                        <button @click="fetchSummary" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded">Filter</button>
+                        <button @click="fetchSummary" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-4 py-2 rounded">Filter</button>
                         <button @click="exportCsv" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded">Export CSV</button>
                     </div>
                 </div>
@@ -60,7 +60,7 @@ onMounted(fetchSummary);
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                             <div class="text-sm text-gray-500">Total Raised</div>
-                            <div class="text-3xl font-bold text-amber-500">{{ summary.total_transactions > 0 ? (summary.total_raised / 100).toFixed(2) : '0.00' }}</div>
+                            <div class="text-3xl font-bold text-accent-500">{{ summary.total_transactions > 0 ? (summary.total_raised / 100).toFixed(2) : '0.00' }}</div>
                             <div class="text-xs text-gray-400">{{ summary.total_transactions }} transactions</div>
                         </div>
                         <div v-for="method in summary.by_method" :key="method.payment_method"

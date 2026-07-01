@@ -21,7 +21,7 @@ class CampaignResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('title')->required(),
-            Forms\Components\Textarea::make('description')->required(),
+            Forms\Components\RichEditor::make('description')->required()->columnSpanFull(),
             Forms\Components\TextInput::make('target_amount')->numeric()->required(),
             Forms\Components\TextInput::make('currency')->default('NGN'),
             Forms\Components\DatePicker::make('start_date'),

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,6 +14,11 @@ class Campaign extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['title', 'slug', 'description', 'target_amount', 'currency', 'raised_amount', 'start_date', 'end_date', 'is_active', 'created_by'];
+
+    protected function description(): Attribute
+    {
+        return Attribute::make(set: fn (?string $value) => HtmlSanitizer::clean($value));
+    }
 
     protected $casts = [
         'target_amount' => 'integer',

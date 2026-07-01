@@ -101,6 +101,9 @@ class PaymentService
         $payment = $paymentId ? Payment::find($paymentId) : Payment::where('payment_reference', $session['payment_intent'])->first();
         if (!$payment) return null;
 
+        // Idempotency guard: skip if already confirmed (webhook may fire more than once).
+        if ($payment->status === 'successful') return $payment;
+
         $payment->update([
             'status' => 'successful',
             'paid_at' => now(),

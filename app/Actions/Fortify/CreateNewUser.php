@@ -5,9 +5,9 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\Validator;
+use Laravel\Fortify\Contracts\CreatesNewUsers;
 
-class CreateNewUser
+class CreateNewUser implements CreatesNewUsers
 {
     public function create(array $input): User
     {

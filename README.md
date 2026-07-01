@@ -47,12 +47,13 @@ The app will be available at `http://localhost`.
 
 | Service | Port | Description |
 |---------|------|-------------|
-| nginx | 80 | Web server / reverse proxy |
+| nginx | 80 / 443 | Web server / reverse proxy |
 | app | 9000 | PHP-FPM (Laravel) |
 | postgres | 5432 | PostgreSQL 16 |
 | redis | 6379 | Redis 7 |
 | queue | - | Laravel queue worker |
 | scheduler | - | Laravel task scheduler |
+| certbot | - | Let's Encrypt issuance + auto-renewal |
 
 ## Default Credentials
 
@@ -61,7 +62,16 @@ After seeding, the following users are created:
 | Role | Email | Password |
 |------|-------|----------|
 | Super Admin | admin@unikosa.org | password |
-| Member | john@example.com | password |
+| Set Representative | setrep@unikosa.org | password |
+| Chapter Head | chapter@unikosa.org | password |
+| Content Moderator | moderator@unikosa.org | password |
+| Finance Admin | finance@unikosa.org | password |
+| Member (approved) | john@example.com | password |
+| Member (pending) | jane@example.com | password |
+
+The staff accounts can sign in to the admin panel at `/admin`; the member
+accounts show the authenticated member-facing experience. `jane@example.com`
+is left in `pending` status to preview the pre-approval state.
 
 ## Roles & Permissions
 
@@ -119,6 +129,44 @@ STRIPE_SECRET=
 ## Admin Panel
 
 Access the admin panel at `/admin`. Login with the admin credentials above.
+
+Branding, theme (mode + accent colour), typography, currency/exchange-rate source,
+and footer social links are configured under **Settings → Site Settings**. Theme
+settings are applied live across the member-facing site via CSS custom properties
+(see `resources/js/theme.js`); members can additionally toggle light/dark/auto for
+their own session.
+
+Transactional email copy (welcome, dues reminder, event RSVP confirmation) is
+editable under **Settings → Email Templates** using `{{ placeholder }}` syntax;
+notifications fall back to built-in defaults if a template is removed.
+
+## Production SSL (Let's Encrypt)
+
+The `nginx` container serves HTTP (and the ACME challenge from `/var/www/certbot`),
+and a `certbot` container handles issuance + auto-renewal.
+
+```bash
+# 1. Point DNS at the server and bring nginx up
+docker compose up -d nginx
+
+# 2. Obtain the first certificate
+DOMAIN=alumni.unikosa.org EMAIL=admin@unikosa.org ./scripts/init-letsencrypt.sh
+
+# 3. Enable HTTPS: copy nginx/ssl.conf.example -> nginx/ssl.conf, set your domain,
+#    add `COPY ssl.conf /etc/nginx/conf.d/ssl.conf` to nginx/Dockerfile, then:
+docker compose up -d --build nginx
+```
+
+The `certbot` service renews certificates every 12 hours automatically.
+
+## Testing
+
+```bash
+php artisan test          # or: docker compose exec app php artisan test
+```
+
+Tests run against an in-memory SQLite database (PostgreSQL `tsvector` full-text
+indexes are skipped outside `pgsql`).
 
 ## License
 

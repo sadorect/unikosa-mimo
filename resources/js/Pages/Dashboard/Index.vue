@@ -28,7 +28,7 @@ const quickLinks = [
 ];
 
 const colorMap = {
-    amber:  { bg: 'bg-amber-50 dark:bg-amber-900/20',  icon: 'text-amber-500' },
+    amber:  { bg: 'bg-accent-50 dark:bg-accent-900/20',  icon: 'text-accent-500' },
     blue:   { bg: 'bg-blue-50 dark:bg-blue-900/20',    icon: 'text-blue-500' },
     green:  { bg: 'bg-green-50 dark:bg-green-900/20',  icon: 'text-green-500' },
     purple: { bg: 'bg-purple-50 dark:bg-purple-900/20',icon: 'text-purple-500' },
@@ -50,13 +50,13 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
                 <!-- Welcome banner -->
-                <div class="bg-linear-to-r from-amber-500 to-amber-400 rounded-2xl p-6 text-white shadow-md">
+                <div class="bg-linear-to-r from-accent-500 to-accent-400 rounded-2xl p-6 text-white shadow-md">
                     <div class="flex flex-wrap items-center justify-between gap-4">
                         <div>
                             <h3 class="text-2xl font-bold mb-1">
                                 Welcome back, {{ $page.props.auth.user.name.split(' ')[0] }}!
                             </h3>
-                            <p class="text-amber-100 text-sm">
+                            <p class="text-accent-100 text-sm">
                                 You are logged in as
                                 <span v-for="role in $page.props.auth.user.roles" :key="role"
                                     class="ml-1 bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">
@@ -75,7 +75,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                 <!-- Stats row -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
-                        <div class="text-3xl font-bold text-amber-600">{{ stats?.total_members || 0 }}</div>
+                        <div class="text-3xl font-bold text-accent-600">{{ stats?.total_members || 0 }}</div>
                         <div class="text-sm text-gray-500 mt-1">Total Members</div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm">
@@ -97,7 +97,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-sm uppercase tracking-wide text-gray-500">Quick Access</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                         <Link v-for="ql in quickLinks" :key="ql.label" :href="route(ql.route)"
-                            class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-amber-300 hover:shadow-sm transition group">
+                            class="flex flex-col items-center gap-2 p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-accent-300 hover:shadow-sm transition group">
                             <div class="w-10 h-10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
                                 :class="colorMap[ql.color].bg">
                                 <svg class="w-5 h-5" :class="colorMap[ql.color].icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,28 +115,28 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100">Upcoming Events</h3>
-                            <Link :href="route('events.index')" class="text-amber-500 hover:text-amber-600 text-sm font-medium">View all →</Link>
+                            <Link :href="route('events.index')" class="text-accent-500 hover:text-accent-600 text-sm font-medium">View all →</Link>
                         </div>
                         <div v-if="upcomingEvents?.length" class="space-y-3">
                             <Link v-for="ev in upcomingEvents" :key="ev.id" :href="route('events.show', ev.id)"
                                 class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition group">
-                                <div class="shrink-0 w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex flex-col items-center justify-center">
-                                    <span class="text-lg font-bold text-amber-600 leading-none">
+                                <div class="shrink-0 w-12 h-12 rounded-lg bg-accent-100 dark:bg-accent-900/30 flex flex-col items-center justify-center">
+                                    <span class="text-lg font-bold text-accent-600 leading-none">
                                         {{ ev.start_at ? new Date(ev.start_at).getDate() : '?' }}
                                     </span>
-                                    <span class="text-xs text-amber-500 uppercase">
+                                    <span class="text-xs text-accent-500 uppercase">
                                         {{ ev.start_at ? new Date(ev.start_at).toLocaleString('default', { month: 'short' }) : '' }}
                                     </span>
                                 </div>
                                 <div class="flex-1 min-w-0">
-                                    <p class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate group-hover:text-amber-600">{{ ev.title }}</p>
+                                    <p class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate group-hover:text-accent-600">{{ ev.title }}</p>
                                     <p class="text-xs text-gray-500 mt-0.5">{{ ev.location || 'Virtual' }}</p>
                                 </div>
                             </Link>
                         </div>
                         <div v-else class="text-center py-8 text-sm text-gray-400">
                             No upcoming events yet.
-                            <Link :href="route('events.create')" class="block mt-2 text-amber-500 font-medium hover:underline">Create one →</Link>
+                            <Link :href="route('events.create')" class="block mt-2 text-accent-500 font-medium hover:underline">Create one →</Link>
                         </div>
                     </div>
 
@@ -144,7 +144,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100">Recent Discussions</h3>
-                            <Link :href="route('forum.index')" class="text-amber-500 hover:text-amber-600 text-sm font-medium">View all →</Link>
+                            <Link :href="route('forum.index')" class="text-accent-500 hover:text-accent-600 text-sm font-medium">View all →</Link>
                         </div>
                         <div v-if="recentPosts?.length" class="space-y-3">
                             <Link v-for="post in recentPosts" :key="post.id" :href="route('forum.show', post.id)"
@@ -154,7 +154,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                                         {{ post.author?.name?.charAt(0) || '?' }}
                                     </div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-amber-600">{{ post.title }}</p>
+                                        <p class="font-medium text-sm text-gray-900 dark:text-gray-100 line-clamp-1 group-hover:text-accent-600">{{ post.title }}</p>
                                         <p class="text-xs text-gray-400 mt-0.5">{{ post.author?.name }} &middot; {{ post.replies_count || 0 }} replies</p>
                                     </div>
                                 </div>
@@ -162,7 +162,7 @@ const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day: 'nu
                         </div>
                         <div v-else class="text-center py-8 text-sm text-gray-400">
                             No forum posts yet.
-                            <Link :href="route('forum.create')" class="block mt-2 text-amber-500 font-medium hover:underline">Start a discussion →</Link>
+                            <Link :href="route('forum.create')" class="block mt-2 text-accent-500 font-medium hover:underline">Start a discussion →</Link>
                         </div>
                     </div>
                 </div>

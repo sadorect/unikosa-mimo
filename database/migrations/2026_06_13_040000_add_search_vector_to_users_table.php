@@ -7,6 +7,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // PostgreSQL full-text search; skipped on other drivers (e.g. sqlite in tests).
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         DB::statement("ALTER TABLE users ADD COLUMN IF NOT EXISTS search_vector tsvector");
         DB::statement("CREATE INDEX IF NOT EXISTS users_search_idx ON users USING GIN(search_vector)");
         DB::statement("
@@ -35,6 +40,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+
         DB::statement("DROP TRIGGER IF EXISTS users_search_update ON users");
         DB::statement("DROP FUNCTION IF EXISTS users_search_update()");
         DB::statement("DROP INDEX IF EXISTS users_search_idx");

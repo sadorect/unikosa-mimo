@@ -21,7 +21,7 @@ class EventResource extends Resource
     {
         return $form->schema([
             Forms\Components\TextInput::make('title')->required(),
-            Forms\Components\Textarea::make('description')->required(),
+            Forms\Components\RichEditor::make('description')->required()->columnSpanFull(),
             Forms\Components\TextInput::make('location'),
             Forms\Components\Toggle::make('is_virtual'),
             Forms\Components\TextInput::make('livestream_url'),

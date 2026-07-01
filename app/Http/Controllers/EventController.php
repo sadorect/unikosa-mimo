@@ -94,6 +94,8 @@ class EventController extends Controller
             ->where('user_id', $request->user()->id)
             ->first();
 
+        $wasGoing = $existing && $existing->status === 'going';
+
         if ($existing) {
             $existing->update(['status' => $request->status]);
         } else {
@@ -102,6 +104,11 @@ class EventController extends Controller
                 'user_id' => $request->user()->id,
                 'status' => $request->status,
             ]);
+        }
+
+        // Confirm attendance the first time the member marks themselves "going".
+        if ($request->status === 'going' && ! $wasGoing) {
+            $request->user()->notify(new \App\Notifications\EventRsvpConfirmation($event));
         }
 
         return back()->with('success', 'RSVP updated.');

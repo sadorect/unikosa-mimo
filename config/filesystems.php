@@ -36,7 +36,7 @@ return [
     ],
 
     'links' => [
-        'public' => env('APP_URL').'/storage',
+        public_path('storage') => storage_path('app/public'),
     ],
 
 ];

@@ -12,6 +12,11 @@ class BackupDatabase extends Command
 
     public function handle(): int
     {
+        if (! config('filesystems.disks.r2.bucket')) {
+            $this->warn('R2 bucket not configured — skipping backup.');
+            return self::SUCCESS;
+        }
+
         $filename = 'backups/db-' . now()->format('Y-m-d_H-i-s') . '.sql.gz';
         $tempPath = sys_get_temp_dir() . '/' . basename($filename);
 
@@ -21,9 +26,17 @@ class BackupDatabase extends Command
         $username = config('database.connections.pgsql.username');
         $password = config('database.connections.pgsql.password');
 
+        // Write a temporary .pgpass so the password never appears in the process list.
+        $pgpassPath = tempnam(sys_get_temp_dir(), 'pgpass_');
+        file_put_contents($pgpassPath, sprintf(
+            "%s:%s:%s:%s:%s\n",
+            $host, $port, $dbName, $username, $password
+        ));
+        chmod($pgpassPath, 0600);
+
         $command = sprintf(
-            'PGPASSWORD=%s pg_dump -h %s -p %s -U %s %s | gzip > %s',
-            escapeshellarg($password),
+            'PGPASSFILE=%s pg_dump -h %s -p %s -U %s %s | gzip > %s',
+            escapeshellarg($pgpassPath),
             escapeshellarg($host),
             escapeshellarg($port),
             escapeshellarg($username),
@@ -32,6 +45,8 @@ class BackupDatabase extends Command
         );
 
         exec($command, $output, $exitCode);
+
+        @unlink($pgpassPath);
 
         if ($exitCode !== 0) {
             $this->error('pg_dump failed.');

@@ -68,12 +68,13 @@ class PaymentController extends Controller
         $reference = $request->query('reference') ?? $request->query('session_id');
 
         if ($request->query('reference')) {
+            // Paystack: verify with the gateway before marking successful.
             $payment = $this->paymentService->verifyPaystackPayment($reference);
         } else {
+            // Stripe: the redirect is informational only. The webhook (POST /api/webhooks/stripe)
+            // is the authoritative confirmation path. Show the current payment state; the UI
+            // should poll or instruct the user to wait for the email confirmation.
             $payment = Payment::where('payment_reference', $reference)->first();
-            if ($payment) {
-                $payment->update(['status' => 'successful', 'paid_at' => now()]);
-            }
         }
 
         return Inertia::render('Payments/Success', [

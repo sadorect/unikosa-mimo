@@ -62,7 +62,7 @@
             </div>
             <div class="mt-1 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div
-                class="h-full rounded-full bg-amber-500 transition-all"
+                class="h-full rounded-full bg-accent-500 transition-all"
                 :style="{ width: Math.min(((c.raised_amount || 0) / c.target_amount) * 100, 100) + '%' }"
               />
             </div>

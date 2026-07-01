@@ -1,0 +1,64 @@
+# Production HTTPS config for UNIKOSA.
+#
+# Enable on the VPS once certificates exist:
+#   1. Run ./scripts/init-letsencrypt.sh (obtains the first certificate)
+#   2. Rename this file to ssl.conf and add `COPY ssl.conf /etc/nginx/conf.d/ssl.conf`
+#      to nginx/Dockerfile (or bind-mount it), replacing example.com with your domain.
+#   3. docker compose up -d --build nginx
+#
+# The :80 server in default.conf keeps serving the ACME challenge and should
+# otherwise redirect to HTTPS (uncomment the redirect block below).
+
+server {
+    listen 80;
+    server_name example.com www.example.com;
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name example.com www.example.com;
+
+    root /var/www/html/public;
+    index index.php index.html;
+    client_max_body_size 64M;
+
+    ssl_certificate     /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass app:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 300;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+    }
+
+    location ~ /\.ht { deny all; }
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    gzip_min_length 1024;
+}

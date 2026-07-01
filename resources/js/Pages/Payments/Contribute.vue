@@ -28,7 +28,7 @@ const progressPercent = props.campaign.target_amount > 0
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-8">
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ campaign.title }}</h1>
-                    <p class="text-gray-600 dark:text-gray-400 mb-6">{{ campaign.description }}</p>
+                    <div class="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400 mb-6" v-html="campaign.description"></div>
 
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6 mb-8">
                         <div class="flex justify-between text-sm text-gray-500 mb-2">
@@ -36,7 +36,7 @@ const progressPercent = props.campaign.target_amount > 0
                             <span>{{ campaign.currency }} {{ (campaign.target_amount / 100).toFixed(2) }} goal</span>
                         </div>
                         <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3">
-                            <div class="bg-amber-500 h-3 rounded-full transition-all" :style="{ width: progressPercent + '%' }"></div>
+                            <div class="bg-accent-500 h-3 rounded-full transition-all" :style="{ width: progressPercent + '%' }"></div>
                         </div>
                         <div class="text-center text-sm text-gray-500 mt-2">{{ progressPercent }}% funded</div>
                     </div>
@@ -47,7 +47,7 @@ const progressPercent = props.campaign.target_amount > 0
                             <div class="flex items-center gap-2">
                                 <span class="text-gray-500 font-medium">{{ campaign.currency }}</span>
                                 <input v-model.number="form.amount" type="number" min="100" step="100"
-                                    class="flex-1 border-gray-300 rounded-md shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-gray-700" required />
+                                    class="flex-1 border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 dark:bg-gray-700" required />
                             </div>
                             <div v-if="form.errors.amount" class="text-red-500 text-sm mt-1">{{ form.errors.amount }}</div>
                         </div>
@@ -55,17 +55,17 @@ const progressPercent = props.campaign.target_amount > 0
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Payment Method</label>
                             <div class="space-y-2">
-                                <label class="flex items-center gap-3 border rounded-lg p-3 cursor-pointer hover:border-amber-500"
-                                    :class="{ 'border-amber-500 bg-amber-50 dark:bg-amber-900/20': form.payment_method === 'paystack' }">
-                                    <input type="radio" v-model="form.payment_method" value="paystack" class="text-amber-500" />
+                                <label class="flex items-center gap-3 border rounded-lg p-3 cursor-pointer hover:border-accent-500"
+                                    :class="{ 'border-accent-500 bg-accent-50 dark:bg-accent-900/20': form.payment_method === 'paystack' }">
+                                    <input type="radio" v-model="form.payment_method" value="paystack" class="text-accent-500" />
                                     <div>
                                         <div class="font-medium text-gray-900 dark:text-gray-100">Paystack</div>
                                         <div class="text-xs text-gray-500">NGN payments</div>
                                     </div>
                                 </label>
-                                <label class="flex items-center gap-3 border rounded-lg p-3 cursor-pointer hover:border-amber-500"
-                                    :class="{ 'border-amber-500 bg-amber-50 dark:bg-amber-900/20': form.payment_method === 'stripe' }">
-                                    <input type="radio" v-model="form.payment_method" value="stripe" class="text-amber-500" />
+                                <label class="flex items-center gap-3 border rounded-lg p-3 cursor-pointer hover:border-accent-500"
+                                    :class="{ 'border-accent-500 bg-accent-50 dark:bg-accent-900/20': form.payment_method === 'stripe' }">
+                                    <input type="radio" v-model="form.payment_method" value="stripe" class="text-accent-500" />
                                     <div>
                                         <div class="font-medium text-gray-900 dark:text-gray-100">Stripe</div>
                                         <div class="text-xs text-gray-500">International card</div>
@@ -75,7 +75,7 @@ const progressPercent = props.campaign.target_amount > 0
                         </div>
 
                         <button type="submit" :disabled="form.processing"
-                            class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded disabled:opacity-50">
+                            class="w-full bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-4 rounded disabled:opacity-50">
                             {{ form.processing ? 'Processing...' : 'Donate' }}
                         </button>
                     </form>

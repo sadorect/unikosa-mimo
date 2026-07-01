@@ -28,9 +28,11 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        DB::statement("ALTER TABLE alumni_jobs ADD COLUMN search_vector tsvector");
-        DB::statement("CREATE INDEX alumni_jobs_search_idx ON alumni_jobs USING GIN(search_vector)");
-        DB::statement("CREATE TRIGGER alumni_jobs_search_update BEFORE INSERT OR UPDATE ON alumni_jobs FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'pg_catalog.english', title, description)");
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement("ALTER TABLE alumni_jobs ADD COLUMN search_vector tsvector");
+            DB::statement("CREATE INDEX alumni_jobs_search_idx ON alumni_jobs USING GIN(search_vector)");
+            DB::statement("CREATE TRIGGER alumni_jobs_search_update BEFORE INSERT OR UPDATE ON alumni_jobs FOR EACH ROW EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'pg_catalog.english', title, description)");
+        }
     }
 
     public function down(): void

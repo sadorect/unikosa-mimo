@@ -59,7 +59,7 @@ const submit = () => {
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Contact Phone</label>
                             <input v-model="form.contact_phone" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm dark:bg-gray-700" />
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit for Review</button>
+                        <button type="submit" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded" :disabled="form.processing">Submit for Review</button>
                     </form>
                 </div>
             </div>

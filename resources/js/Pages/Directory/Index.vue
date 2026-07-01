@@ -28,7 +28,7 @@ const selectedChapter = ref('');
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <form class="mb-6 flex flex-wrap gap-4">
                         <input v-model="search" type="text" placeholder="Search by name, profession, skills..."
-                            class="flex-1 min-w-[200px] border-gray-300 rounded-md shadow-sm focus:border-amber-500 focus:ring-amber-500 dark:bg-gray-700 dark:border-gray-600">
+                            class="flex-1 min-w-[200px] border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 dark:bg-gray-700 dark:border-gray-600">
                         <select v-model="selectedSet" class="border-gray-300 rounded-md shadow-sm dark:bg-gray-700">
                             <option value="">All Sets</option>
                             <option v-for="set in sets" :key="set.id" :value="set.id">{{ set.name }}</option>
@@ -43,7 +43,7 @@ const selectedChapter = ref('');
                         <div v-for="member in members.data" :key="member.id"
                             class="border dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition">
                             <div class="flex items-center gap-3">
-                                <div class="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 font-bold">
+                                <div class="w-12 h-12 rounded-full bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center text-accent-600 font-bold">
                                     {{ member.name.charAt(0) }}
                                 </div>
                                 <div>
