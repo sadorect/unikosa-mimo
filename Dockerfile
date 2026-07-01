@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     supervisor \
     curl \
+    postgresql-client \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip opcache intl \
     && pecl install redis \
@@ -36,9 +37,13 @@ RUN groupadd -g 1000 www && useradd -u 1000 -ms /bin/bash -g www www
 RUN mkdir -p /var/www/html/storage /var/www/html/bootstrap/cache \
     && chown -R www:www /var/www/html
 
+COPY --chown=www:www docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /var/www/html
 
 USER www
 
 EXPOSE 9000
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]

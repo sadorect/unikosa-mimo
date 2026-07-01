@@ -67,12 +67,12 @@ class SiteSettings extends Page implements HasForms
                         Forms\Components\FileUpload::make('logo_path')
                             ->label('Logo')
                             ->image()
-                            ->disk('r2')
+                            ->disk(config('filesystems.default'))
                             ->directory('branding'),
                         Forms\Components\FileUpload::make('favicon_path')
                             ->label('Favicon')
                             ->image()
-                            ->disk('r2')
+                            ->disk(config('filesystems.default'))
                             ->directory('branding'),
                     ])->columns(3),
 
