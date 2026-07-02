@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/search', [SearchController::class, 'global'])->name('search.global');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::middleware(fn ($req, $next) => $req->user()?->hasRole('super_admin') ? $next($req) : abort(403))->group(function () {
+    Route::middleware('role:super_admin')->group(function () {
         Route::get('/admin/financial-reports', [FinancialReportController::class, 'index'])->name('admin.reports.index');
         Route::get('/admin/financial-reports/summary', [FinancialReportController::class, 'summary'])->name('admin.reports.summary');
         Route::get('/admin/financial-reports/export', [FinancialReportController::class, 'export'])->name('admin.reports.export');
