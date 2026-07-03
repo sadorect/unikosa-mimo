@@ -4,6 +4,7 @@ use App\Http\Controllers\AccountStatusController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\ClaimProfileController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DirectoryController;
+use App\Http\Controllers\ElectionController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
@@ -91,6 +93,19 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
         Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('events.rsvp');
         Route::post('/events/{event}/ticket', [EventController::class, 'purchaseTicket'])->name('events.ticket');
+    });
+
+    Route::middleware('module:elections')->group(function () {
+        Route::get('/elections', [ElectionController::class, 'index'])->name('elections.index');
+        Route::get('/elections/{election}', [ElectionController::class, 'show'])->name('elections.show');
+        Route::get('/elections/{election}/results', [ElectionController::class, 'results'])->name('elections.results');
+
+        Route::post('/elections/{election}/positions/{position}/nominate', [CandidateController::class, 'store'])->name('elections.nominate');
+        Route::delete('/elections/candidates/{candidate}', [CandidateController::class, 'withdraw'])->name('elections.candidates.withdraw');
+
+        Route::post('/elections/{election}/vote', [ElectionController::class, 'vote'])
+            ->middleware('throttle:10,1')
+            ->name('elections.vote');
     });
 
     Route::middleware('module:forum')->group(function () {

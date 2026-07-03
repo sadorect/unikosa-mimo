@@ -20,7 +20,10 @@ class EventRsvpConfirmation extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        // Email only. The in-app bell notification is created directly as an
+        // UnikosaNotification (see EventController::sendRsvpConfirmation) so it matches the
+        // rest of the app's notification shape and carries a working deep link.
+        return ['mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -48,14 +51,5 @@ class EventRsvpConfirmation extends Notification implements ShouldQueue
             ->subject('You are confirmed for ' . $this->event->title)
             ->line('Your RSVP for ' . $this->event->title . ' on ' . $eventDate . ' is confirmed.')
             ->line('We look forward to seeing you there!');
-    }
-
-    public function toArray(object $notifiable): array
-    {
-        return [
-            'type' => 'event_rsvp_confirmation',
-            'event_id' => $this->event->id,
-            'message' => 'Your RSVP for ' . $this->event->title . ' is confirmed.',
-        ];
     }
 }

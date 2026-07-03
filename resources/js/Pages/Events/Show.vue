@@ -4,7 +4,13 @@ import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
-const props = defineProps({ event: Object, userRsvp: Object });
+const props = defineProps({
+    event: Object,
+    userRsvp: Object,
+    hasPaidTicket: Boolean,
+    canManage: Boolean,
+    attendees: { type: Array, default: null },
+});
 
 const isOwnUnapprovedEvent = computed(() =>
     props.event.status !== 'approved' && props.event.created_by === usePage().props.auth?.user?.id
@@ -99,7 +105,7 @@ const goingCount = props.event.rsvps_going_count || 0;
                                 <button v-for="status in ['going', 'maybe', 'not_going']" :key="status"
                                     @click="rsvp(status)"
                                     class="px-4 py-2 rounded-full text-sm font-medium transition border"
-                                    :class="userRsvp?.pivot?.status === status
+                                    :class="userRsvp?.status === status
                                         ? 'bg-accent-500 text-white border-accent-500'
                                         : 'border-gray-300 text-gray-600 hover:border-accent-500'">
                                     {{ status === 'going' ? 'Going' : status === 'maybe' ? 'Maybe' : 'Can\'t Go' }}
@@ -108,20 +114,36 @@ const goingCount = props.event.rsvps_going_count || 0;
                         </div>
 
                         <div v-if="event.is_paid && event.ticket_price" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
-                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Purchase Ticket</h3>
-                            <div class="text-2xl font-bold text-accent-500 mb-4">{{ event.ticket_currency || 'NGN' }} {{ (event.ticket_price / 100).toFixed(2) }}</div>
-                            <div class="flex gap-3">
-                                <label v-for="method in ['paystack', 'stripe']" :key="method"
-                                    class="flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer hover:border-accent-500"
-                                    :class="{ 'border-accent-500 bg-accent-50 dark:bg-accent-900/20': ticketForm.payment_method === method }">
-                                    <input type="radio" v-model="ticketForm.payment_method" :value="method" class="text-accent-500" />
-                                    <span class="text-sm font-medium capitalize">{{ method }}</span>
-                                </label>
+                            <div v-if="hasPaidTicket" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 px-4 py-3 rounded-lg text-sm">
+                                You have a ticket for this event. See you there!
                             </div>
-                            <button @click="buyTicket" :disabled="ticketForm.processing"
-                                class="mt-3 bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded disabled:opacity-50">
-                                {{ ticketForm.processing ? 'Processing...' : 'Buy Ticket' }}
-                            </button>
+                            <template v-else>
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Purchase Ticket</h3>
+                                <div class="text-2xl font-bold text-accent-500 mb-4">{{ event.ticket_currency || 'NGN' }} {{ (event.ticket_price / 100).toFixed(2) }}</div>
+                                <div class="flex gap-3">
+                                    <label v-for="method in ['paystack', 'stripe']" :key="method"
+                                        class="flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer hover:border-accent-500"
+                                        :class="{ 'border-accent-500 bg-accent-50 dark:bg-accent-900/20': ticketForm.payment_method === method }">
+                                        <input type="radio" v-model="ticketForm.payment_method" :value="method" class="text-accent-500" />
+                                        <span class="text-sm font-medium capitalize">{{ method }}</span>
+                                    </label>
+                                </div>
+                                <button @click="buyTicket" :disabled="ticketForm.processing"
+                                    class="mt-3 bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded disabled:opacity-50">
+                                    {{ ticketForm.processing ? 'Processing...' : 'Buy Ticket' }}
+                                </button>
+                            </template>
+                        </div>
+
+                        <div v-if="canManage && attendees" class="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                            <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Attendees ({{ attendees.length }})</h3>
+                            <ul v-if="attendees.length" class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <li v-for="(a, i) in attendees" :key="i" class="flex items-center justify-between py-2 text-sm">
+                                    <span class="text-gray-800 dark:text-gray-200">{{ a.name }}</span>
+                                    <span v-if="a.paid" class="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-800">Paid</span>
+                                </li>
+                            </ul>
+                            <p v-else class="text-sm text-gray-400">No confirmed attendees yet.</p>
                         </div>
                     </div>
                 </div>

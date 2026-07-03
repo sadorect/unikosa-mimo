@@ -27,6 +27,7 @@ class SettingsSeeder extends Seeder
             ['key' => 'business_directory_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'forum_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'events_enabled', 'value' => 'true', 'group' => 'modules'],
+            ['key' => 'elections_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'blog_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'gallery_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'mentorship_enabled', 'value' => 'true', 'group' => 'modules'],

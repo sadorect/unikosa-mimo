@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\Event;
+use App\Models\EventRsvp;
 use App\Models\Payment;
 use Illuminate\Support\Str;
 
@@ -83,7 +85,7 @@ class PaymentService
                 'gateway_response' => $result['data'],
             ]);
 
-            $this->updatePayableAmount($payment);
+            $this->applyPostPaymentEffects($payment);
         } else {
             $payment->update(['status' => 'failed']);
         }
@@ -115,10 +117,16 @@ class PaymentService
         return $payment;
     }
 
-    protected function updatePayableAmount(Payment $payment): void
+    /**
+     * Side effects that must fire exactly once when a payment becomes successful.
+     * Both success paths (Paystack verify, Stripe webhook) are idempotent before
+     * calling this, so this runs once per payment.
+     */
+    protected function applyPostPaymentEffects(Payment $payment): void
     {
         $payable = $payment->payable;
 
+        // Campaigns/other fundraising payables track a running total.
         if ($payable && method_exists($payable, 'raised_amount')) {
             $totalPaid = Payment::where('payable_type', $payment->payable_type)
                 ->where('payable_id', $payment->payable_id)
@@ -126,6 +134,15 @@ class PaymentService
                 ->sum('amount');
 
             $payable->update(['raised_amount' => $totalPaid]);
+        }
+
+        // A successful event-ticket payment is what actually grants the buyer a ticket:
+        // record it on their RSVP so they (and organizers) have a trackable, paid attendance.
+        if ($payable instanceof Event) {
+            EventRsvp::updateOrCreate(
+                ['event_id' => $payable->id, 'user_id' => $payment->user_id],
+                ['status' => 'going', 'paid' => true, 'payment_reference' => $payment->payment_reference],
+            );
         }
     }
 }

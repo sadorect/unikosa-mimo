@@ -11,3 +11,4 @@ Schedule::job(new SendEventDigest)->daily()->at('07:00')->name('event-digest');
 Schedule::job(new SendDuesReminders)->monthlyOn(1, '09:00')->name('dues-reminders');
 Schedule::job(new SendBlogDigest)->weekly()->mondays()->at('08:00')->name('blog-digest');
 Schedule::command('db:backup')->daily()->at('02:00')->name('db-backup');
+Schedule::command('elections:close-expired')->everyFiveMinutes()->name('close-expired-elections');

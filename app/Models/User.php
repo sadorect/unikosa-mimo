@@ -116,4 +116,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasMany(UnikosaNotification::class);
     }
+
+    public function candidacies(): HasMany
+    {
+        return $this->hasMany(Candidate::class);
+    }
 }
