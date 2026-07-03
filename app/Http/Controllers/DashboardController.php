@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\ForumPost;
 use App\Models\Set;
 use App\Models\User;
+use App\Support\Celebrations;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
@@ -33,6 +34,7 @@ class DashboardController extends Controller
             ],
             'upcomingEvents' => $upcomingEvents,
             'recentPosts'    => $recentPosts,
+            'celebrations'   => Celebrations::upcoming(14),
         ]);
     }
 }

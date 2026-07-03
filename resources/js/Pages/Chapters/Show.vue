@@ -1,19 +1,18 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import Celebrations from '@/Components/Celebrations.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps({ chapter: Object, members: Object });
+defineProps({ chapter: Object, members: Object, celebrations: { type: Array, default: () => [] } });
 </script>
 
 <template>
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="chapter.name" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('chapters.index')" class="text-accent-600 hover:text-accent-700 text-sm">Chapters</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ chapter.name }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Chapters', href: route('chapters.index') }, { label: chapter.name }]" />
         </template>
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -26,6 +25,7 @@ defineProps({ chapter: Object, members: Object });
                     </div>
                     <div class="mt-2 text-sm text-gray-500">{{ chapter.members_count }} members</div>
                 </div>
+                <Celebrations :items="celebrations" title="Celebrations in this chapter" class="mb-6" />
                 <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4">Members</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="member in members.data" :key="member.id"
@@ -39,6 +39,8 @@ defineProps({ chapter: Object, members: Object });
                         </div>
                     </div>
                 </div>
+
+                <Pagination :paginator="members" />
             </div>
         </div>
     </AuthLayout>

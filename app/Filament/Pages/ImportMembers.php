@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasPermissionGuardedPage;
 use App\Models\Chapter;
 use App\Models\Set;
 use App\Models\User;
@@ -19,6 +20,10 @@ use Illuminate\Support\Str;
 
 class ImportMembers extends Page
 {
+    use HasPermissionGuardedPage;
+
+    protected static string|array $permission = 'manage members';
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-up-tray';
     protected static ?string $navigationGroup = 'Management';
     protected static ?int $navigationSort = 5;

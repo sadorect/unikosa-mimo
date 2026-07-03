@@ -44,7 +44,12 @@ class BusinessController extends Controller
     public function show(BusinessListing $business)
     {
         $business->load('owner');
-        $business->increment('views_count');
+
+        $seen = session()->get('viewed_businesses', []);
+        if (! in_array($business->id, $seen, true)) {
+            $business->increment('views_count');
+            session()->put('viewed_businesses', [...$seen, $business->id]);
+        }
 
         return Inertia::render('Business/Show', [
             'business' => $business,

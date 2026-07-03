@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\BlogPostResource\Pages;
 use App\Models\BlogPost;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class BlogPostResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = ['manage blog', 'moderate content'];
+
     protected static ?string $model = BlogPost::class;
     protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
     protected static ?string $navigationGroup = 'Content';

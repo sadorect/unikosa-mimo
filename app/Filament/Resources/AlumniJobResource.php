@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\AlumniJobResource\Pages;
 use App\Models\AlumniJob;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class AlumniJobResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage jobs';
+
     protected static ?string $model = AlumniJob::class;
     protected static ?string $modelLabel = 'Job Listing';
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';

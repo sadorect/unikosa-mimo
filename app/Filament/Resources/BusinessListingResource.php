@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\BusinessListingResource\Pages;
 use App\Models\BusinessListing;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class BusinessListingResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage business listings';
+
     protected static ?string $model = BusinessListing::class;
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
     protected static ?string $navigationGroup = 'Content';

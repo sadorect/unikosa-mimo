@@ -1,5 +1,6 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
+import PasswordInput from '@/Components/PasswordInput.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -148,13 +149,13 @@ const verifyAndClaim = () => {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Set Password</label>
-                        <input v-model="form.password" type="password" placeholder="Choose a password"
+                        <PasswordInput v-model="form.password" placeholder="Choose a password"
                             class="w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500" />
                         <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                        <input v-model="form.password_confirmation" type="password" placeholder="Confirm password"
+                        <PasswordInput v-model="form.password_confirmation" placeholder="Confirm password"
                             class="w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500" />
                     </div>
                     <button @click="verifyAndClaim"

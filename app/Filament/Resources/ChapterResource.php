@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\ChapterResource\Pages;
 use App\Models\Chapter;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class ChapterResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage chapters';
+
     protected static ?string $model = Chapter::class;
     protected static ?string $navigationIcon = 'heroicon-o-globe-alt';
     protected static ?string $navigationGroup = 'Management';

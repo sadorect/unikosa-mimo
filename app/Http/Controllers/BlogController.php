@@ -12,7 +12,7 @@ class BlogController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BlogPost::with(['author', 'categories'])
+        $query = BlogPost::with(['author:id,name,avatar', 'categories'])
             ->where('status', 'published')
             ->latest('published_at');
 
@@ -29,11 +29,28 @@ class BlogController extends Controller
 
     public function show(BlogPost $post)
     {
-        $post->load(['author', 'categories']);
-        $post->increment('views_count');
+        $post->load(['author:id,name,avatar', 'categories']);
+
+        $seen = session()->get('viewed_blog_posts', []);
+        if (! in_array($post->id, $seen, true)) {
+            $post->increment('views_count');
+            session()->put('viewed_blog_posts', [...$seen, $post->id]);
+        }
+
+        $prev = BlogPost::where('status', 'published')
+            ->where('published_at', '<', $post->published_at)
+            ->orderByDesc('published_at')
+            ->first(['id', 'title', 'slug']);
+
+        $next = BlogPost::where('status', 'published')
+            ->where('published_at', '>', $post->published_at)
+            ->orderBy('published_at')
+            ->first(['id', 'title', 'slug']);
 
         return Inertia::render('Blog/Show', [
             'post' => $post,
+            'prev' => $prev,
+            'next' => $next,
         ]);
     }
 

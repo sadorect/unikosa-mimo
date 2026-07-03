@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\SettingResource\Pages;
 use App\Models\Setting;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class SettingResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage settings';
+
     protected static ?string $model = Setting::class;
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
     protected static ?string $navigationGroup = 'Settings';

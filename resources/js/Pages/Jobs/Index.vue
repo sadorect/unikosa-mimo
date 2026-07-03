@@ -1,12 +1,13 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-defineProps({ jobs: Object, filters: Object });
+const props = defineProps({ jobs: Object, filters: Object });
 
-const search = ref(filters?.search || '');
-const type = ref(filters?.type || '');
+const search = ref(props.filters?.search || '');
+const type = ref(props.filters?.type || '');
 
 // description is rich HTML; show a plain-text preview in the list.
 const textPreview = (html) => (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -71,6 +72,8 @@ const filter = () => {
                 </div>
 
                 <div v-if="!jobs.data.length" class="text-center py-12 text-gray-500">No jobs found.</div>
+
+                <Pagination :paginator="jobs" />
             </div>
         </div>
     </AuthLayout>

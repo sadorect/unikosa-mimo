@@ -36,7 +36,12 @@ class JobController extends Controller
     public function show(AlumniJob $job)
     {
         $job->load('author');
-        $job->increment('views_count');
+
+        $seen = session()->get('viewed_jobs', []);
+        if (! in_array($job->id, $seen, true)) {
+            $job->increment('views_count');
+            session()->put('viewed_jobs', [...$seen, $job->id]);
+        }
 
         $hasApplied = false;
         if (auth()->check()) {
@@ -89,7 +94,9 @@ class JobController extends Controller
 
         $cvPath = null;
         if ($request->hasFile('cv')) {
-            $cvPath = $request->file('cv')->store('cvs/' . auth()->id(), 'r2');
+            $disk = config('filesystems.media_disk');
+            $stored = $request->file('cv')->store('cvs/' . auth()->id(), $disk);
+            $cvPath = \Illuminate\Support\Facades\Storage::disk($disk)->url($stored);
         }
 
         JobApplication::create([
@@ -103,8 +110,13 @@ class JobController extends Controller
         return back()->with('success', 'Application submitted successfully.');
     }
 
-    public function applications(AlumniJob $job)
+    public function applications(Request $request, AlumniJob $job)
     {
+        abort_unless(
+            $job->user_id === $request->user()->id || $request->user()->can('manage jobs'),
+            403
+        );
+
         $job->load('applications.applicant', 'applications.referrer');
 
         return Inertia::render('Jobs/Applications', [

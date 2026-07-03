@@ -4,6 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title inertia>{{ config('app.name', 'Unikosa') }}</title>
+    <meta name="description" content="{{ \App\Models\Setting::get('site_name', 'UNIKOSA') }} is the official global alumni network — connecting graduates for events, mentorship, jobs, and giving back.">
+    <meta name="theme-color" content="{{ \App\Models\Setting::get('accent_color', '#F59E0B') }}">
+    <meta property="og:locale" content="en_US">
+
+    <link rel="manifest" href="{{ route('manifest') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ \App\Models\Setting::get('site_name', 'UNIKOSA') }}">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

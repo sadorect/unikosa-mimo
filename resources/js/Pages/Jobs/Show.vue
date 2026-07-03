@@ -1,18 +1,27 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref, nextTick } from 'vue';
 
 const props = defineProps({ job: Object, hasApplied: Boolean });
 
 const showApply = ref(false);
+const applyCard = ref(null);
 const applyForm = useForm({
     cover_letter: '',
     cv: null,
 });
 
+const openApply = async () => {
+    showApply.value = true;
+    await nextTick();
+    applyCard.value?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+};
+
 const submitApplication = () => {
     applyForm.post(route('jobs.apply', props.job.id), {
+        preserveScroll: true,
         onSuccess: () => {
             showApply.value = false;
             applyForm.reset();
@@ -25,11 +34,7 @@ const submitApplication = () => {
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="job.title" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('jobs.index')" class="text-accent-600 hover:text-accent-700 text-sm">Jobs</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm truncate">{{ job.title }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Jobs', href: route('jobs.index') }, { label: job.title }]" />
         </template>
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
@@ -71,7 +76,7 @@ const submitApplication = () => {
                         </div>
 
                         <div v-if="!hasApplied && !job.application_url" class="mb-4">
-                            <button @click="showApply = !showApply" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-4 py-2 rounded">
+                            <button @click="openApply" class="bg-accent-500 hover:bg-accent-600 text-white font-medium px-5 py-2.5 rounded-lg transition">
                                 Apply Now
                             </button>
                         </div>
@@ -82,7 +87,11 @@ const submitApplication = () => {
                     </div>
                 </div>
 
-                <div v-if="showApply" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mt-6">
+                <div v-if="$page.props.flash?.success" class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300 px-4 py-3 rounded-lg text-sm mt-6">
+                    {{ $page.props.flash.success }}
+                </div>
+
+                <div v-if="showApply" ref="applyCard" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mt-6 ring-2 ring-accent-200 dark:ring-accent-900">
                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4">Apply for this position</h3>
                     <form @submit.prevent="submitApplication" class="space-y-4">
                         <div>

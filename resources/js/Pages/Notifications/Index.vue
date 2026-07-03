@@ -1,6 +1,8 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
+import { timeAgo } from '@/lib/date';
 
 defineProps({ notifications: Object, unreadCount: Number });
 
@@ -12,6 +14,15 @@ const markAllRead = () => {
     router.post(route('notifications.read-all'));
 };
 
+const openNotification = (notification) => {
+    if (!notification.read_at) {
+        markAsRead(notification.id);
+    }
+    if (notification.data?.url) {
+        router.visit(notification.data.url);
+    }
+};
+
 const iconForType = (type) => {
     const icons = {
         member_approved: '👤',
@@ -19,6 +30,7 @@ const iconForType = (type) => {
         dues_reminder: '💰',
         forum_reply: '💬',
         blog_published: '📝',
+        direct_message: '📩',
         default: '🔔',
     };
     return icons[type] || icons.default;
@@ -46,23 +58,18 @@ const iconForType = (type) => {
                     <div v-for="notification in notifications.data" :key="notification.id"
                         class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition cursor-pointer"
                         :class="{ 'bg-accent-50/50 dark:bg-accent-900/10': !notification.read_at }"
-                        @click="!notification.read_at && markAsRead(notification.id)">
+                        @click="openNotification(notification)">
                         <div class="flex items-start gap-3">
                             <span class="text-xl mt-0.5">{{ iconForType(notification.data?.type) }}</span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-sm text-gray-900 dark:text-gray-100">{{ notification.data?.message }}</p>
-                                <p class="text-xs text-gray-500 mt-1">{{ notification.created_at }}</p>
+                                <p class="text-xs text-gray-500 mt-1">{{ timeAgo(notification.created_at) }}</p>
                             </div>
                             <div v-if="!notification.read_at" class="w-2 h-2 rounded-full bg-accent-500 mt-2 shrink-0"></div>
                         </div>
                     </div>
                 </div>
-                <div v-if="notifications.last_page > 1" class="mt-4 flex justify-center gap-2">
-                    <Link v-if="notifications.prev_page_url" :href="notifications.prev_page_url"
-                        class="px-3 py-1 text-sm bg-white dark:bg-gray-800 rounded border hover:bg-gray-50">Previous</Link>
-                    <Link v-if="notifications.next_page_url" :href="notifications.next_page_url"
-                        class="px-3 py-1 text-sm bg-white dark:bg-gray-800 rounded border hover:bg-gray-50">Next</Link>
-                </div>
+                <Pagination :paginator="notifications" />
             </div>
         </div>
     </AuthLayout>

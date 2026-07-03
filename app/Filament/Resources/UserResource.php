@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
@@ -9,9 +10,14 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage members';
+
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Management';
@@ -41,7 +47,9 @@ class UserResource extends Resource
             ]),
             Forms\Components\Section::make('Status & Role')->schema([
                 Forms\Components\Select::make('status')->options(['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected'])->required(),
-                Forms\Components\Select::make('roles')->relationship('roles', 'name')->multiple()->preload(),
+                Forms\Components\Select::make('roles')->relationship('roles', 'name')->multiple()->preload()
+                    ->disabled(fn () => !Auth::user()?->hasRole('super_admin'))
+                    ->helperText('Only super admins can change role assignments.'),
             ]),
             Forms\Components\Section::make('Import Status')->schema([
                 Forms\Components\Toggle::make('imported')->label('Imported Record'),

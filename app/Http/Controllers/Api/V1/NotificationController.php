@@ -17,8 +17,10 @@ class NotificationController extends ApiController
         return response()->json($notifications);
     }
 
-    public function markRead(UnikosaNotification $notification): JsonResponse
+    public function markRead(Request $request, UnikosaNotification $notification): JsonResponse
     {
+        abort_unless($notification->user_id === $request->user()->id, 403);
+
         $notification->update(['read_at' => now()]);
         return response()->json(['message' => 'Marked as read.']);
     }

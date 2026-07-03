@@ -1,19 +1,18 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import Celebrations from '@/Components/Celebrations.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps({ set: Object, members: Object });
+defineProps({ set: Object, members: Object, celebrations: { type: Array, default: () => [] } });
 </script>
 
 <template>
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="set.name" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('sets.index')" class="text-accent-600 hover:text-accent-700 text-sm">Sets</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ set.name }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Sets', href: route('sets.index') }, { label: set.name }]" />
         </template>
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -25,6 +24,7 @@ defineProps({ set: Object, members: Object });
                     </div>
                     <div class="mt-2 text-sm text-gray-500">{{ set.members_count }} members</div>
                 </div>
+                <Celebrations :items="celebrations" title="Celebrations in this set" class="mb-6" />
                 <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-4">Members</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="member in members.data" :key="member.id"
@@ -38,6 +38,8 @@ defineProps({ set: Object, members: Object });
                         </div>
                     </div>
                 </div>
+
+                <Pagination :paginator="members" />
             </div>
         </div>
     </AuthLayout>

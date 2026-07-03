@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GalleryAlbum;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -12,7 +13,9 @@ class GalleryController extends Controller
     public function index()
     {
         return Inertia::render('Gallery/Index', [
-            'albums' => GalleryAlbum::with(['event', 'media'])
+            'albums' => GalleryAlbum::with('event')
+                ->withCount('media')
+                ->with(['media' => fn ($query) => $query->orderByRaw("type = 'video'")->oldest()->limit(1)])
                 ->latest()
                 ->paginate(12),
         ]);
@@ -45,19 +48,41 @@ class GalleryController extends Controller
 
     public function uploadMedia(Request $request, GalleryAlbum $album)
     {
+        $imageMaxKb = 20480;  // 20MB
+        $videoMaxKb = 204800; // 200MB
+
         $validated = $request->validate([
             'files' => 'required|array',
-            'files.*' => 'file|max:10240',
+            'files.*' => [
+                'required',
+                'file',
+                'mimes:jpg,jpeg,png,gif,webp,mp4,mov,avi,webm,mkv',
+                function ($attribute, $file, $fail) use ($imageMaxKb, $videoMaxKb) {
+                    $isVideo = str_starts_with($file->getMimeType(), 'video');
+                    $limitKb = $isVideo ? $videoMaxKb : $imageMaxKb;
+
+                    if ($file->getSize() > $limitKb * 1024) {
+                        $fail(sprintf(
+                            '"%s" exceeds the %dMB limit for %s.',
+                            $file->getClientOriginalName(),
+                            intdiv($limitKb, 1024),
+                            $isVideo ? 'videos' : 'images'
+                        ));
+                    }
+                },
+            ],
             'captions' => 'nullable|array',
         ]);
 
+        $disk = config('filesystems.media_disk');
+
         foreach ($request->file('files') as $index => $file) {
-            $path = $file->store('gallery/' . $album->slug, 'r2');
+            $path = $file->store('gallery/' . $album->slug, $disk);
             $mimeType = $file->getMimeType();
             $type = str_starts_with($mimeType, 'video') ? 'video' : 'image';
 
             $album->media()->create([
-                'path' => $path,
+                'path' => Storage::disk($disk)->url($path),
                 'caption' => $validated['captions'][$index] ?? null,
                 'type' => $type,
                 'user_id' => $request->user()->id,

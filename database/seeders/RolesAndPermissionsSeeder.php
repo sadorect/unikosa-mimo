@@ -27,6 +27,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'moderate content',
             'view financial reports',
             'manage gallery',
+            'moderate events',
         ];
 
         foreach ($permissions as $permission) {
@@ -43,7 +44,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ->givePermissionTo(['manage events']);
 
         Role::create(['name' => 'content_moderator', 'guard_name' => 'web'])
-            ->givePermissionTo(['moderate content', 'manage forum', 'manage blog']);
+            ->givePermissionTo(['moderate content', 'manage forum', 'manage blog', 'moderate events']);
 
         Role::create(['name' => 'finance_admin', 'guard_name' => 'web'])
             ->givePermissionTo(['manage campaigns', 'manage payments', 'view financial reports', 'manage settings']);

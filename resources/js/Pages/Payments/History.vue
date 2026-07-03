@@ -1,6 +1,8 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { formatDate } from '@/lib/date';
 
 defineProps({ payments: Object });
 
@@ -34,7 +36,7 @@ const statusBadge = (status) => {
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="payment in payments.data" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ payment.paid_at || payment.created_at }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(payment.paid_at || payment.created_at) }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
                                     {{ payment.payable?.name || payment.payable?.title || 'Payment' }}
                                 </td>
@@ -58,6 +60,8 @@ const statusBadge = (status) => {
                     </table>
                     <div v-if="!payments.data.length" class="p-8 text-center text-gray-500">No payments found.</div>
                 </div>
+
+                <Pagination :paginator="payments" />
             </div>
         </div>
     </AuthLayout>

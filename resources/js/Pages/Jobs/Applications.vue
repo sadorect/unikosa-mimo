@@ -1,6 +1,7 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { formatDate } from '@/lib/date';
 
 defineProps({ job: Object });
 </script>
@@ -34,7 +35,7 @@ defineProps({ job: Object });
                                     <div class="font-medium text-gray-900 dark:text-gray-100 text-sm">{{ app.applicant?.name }}</div>
                                     <div class="text-xs text-gray-500">{{ app.applicant?.email }}</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ app.created_at }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(app.created_at) }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ app.referrer?.name || 'Direct' }}</td>
                                 <td class="px-6 py-4">
                                     <span class="px-2 py-1 text-xs font-medium rounded-full"

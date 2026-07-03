@@ -1,12 +1,13 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-defineProps({ businesses: Object, categories: Array, filters: Object });
+const props = defineProps({ businesses: Object, categories: Array, filters: Object });
 
-const search = ref(filters?.search || '');
-const selectedCategory = ref(filters?.category || '');
+const search = ref(props.filters?.search || '');
+const selectedCategory = ref(props.filters?.category || '');
 
 // description is rich HTML; show a plain-text preview in the list.
 const textPreview = (html) => (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -50,6 +51,8 @@ const filter = () => {
                 </div>
 
                 <div v-if="!businesses.data.length" class="text-center py-12 text-gray-500">No businesses found.</div>
+
+                <Pagination :paginator="businesses" />
             </div>
         </div>
     </AuthLayout>

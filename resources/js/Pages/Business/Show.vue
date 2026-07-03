@@ -1,5 +1,6 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({ business: Object });
@@ -9,11 +10,7 @@ defineProps({ business: Object });
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="business.name" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('business.index')" class="text-accent-600 hover:text-accent-700 text-sm">Business Directory</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ business.name }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Business Directory', href: route('business.index') }, { label: business.name }]" />
         </template>
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">

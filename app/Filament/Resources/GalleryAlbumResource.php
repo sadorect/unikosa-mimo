@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\GalleryAlbumResource\Pages;
 use App\Models\GalleryAlbum;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class GalleryAlbumResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage gallery';
+
     protected static ?string $model = GalleryAlbum::class;
     protected static ?string $navigationIcon = 'heroicon-o-photo';
     protected static ?string $navigationGroup = 'Content';

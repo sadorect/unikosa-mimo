@@ -28,7 +28,7 @@ class NotificationController extends Controller
 
     public function markAsRead(Request $request, UnikosaNotification $notification)
     {
-        $this->authorize('update', $notification);
+        abort_unless($notification->user_id === $request->user()->id, 403);
 
         $notification->update(['read_at' => now()]);
 

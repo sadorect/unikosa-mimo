@@ -19,7 +19,8 @@ Route::prefix('v1')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
 
     // Profile claiming (public): locate an imported record, then email an OTP.
-    Route::post('/claim-profile/search', [ClaimProfileController::class, 'search']);
+    Route::post('/claim-profile/search', [ClaimProfileController::class, 'search'])
+        ->middleware('throttle:10,1');
     Route::post('/claim-profile/send-otp', [ClaimProfileController::class, 'sendOtp'])
         ->middleware('throttle:3,1');
 

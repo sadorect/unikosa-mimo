@@ -4,6 +4,16 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    /*
+     * Disk used for user-facing media (avatars, gallery photos, branding
+     * logo/favicon) that must be reachable over HTTP. Deliberately separate
+     * from 'default': that disk is for private/internal storage and its
+     * 'local' driver has no public URL, so using it here would silently
+     * 404 uploaded images. Point this at 'r2' (with R2_* env vars set)
+     * to move public media to object storage without touching any code.
+     */
+    'media_disk' => env('MEDIA_DISK', 'public'),
+
     'disks' => [
 
         'local' => [

@@ -1,13 +1,32 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
-import { Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import SeoHead from '@/Components/SeoHead.vue';
+import Footer from '@/Components/Footer.vue';
+import { computed, ref } from 'vue';
 
 defineProps({
     stats: Object,
 });
 
 const mobileOpen = ref(false);
+
+const page = usePage();
+const siteName = computed(() => page.props.settings?.site_name || 'UNIKOSA');
+const heroDescription = `One platform for every ${siteName.value} alumnus — connect, collaborate, celebrate, and give back to the global alumni community.`;
+
+const organizationJsonLd = computed(() => {
+    const social = page.props.settings?.social || {};
+    const sameAs = Object.values(social).filter(Boolean);
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: siteName.value,
+        url: window.location.origin,
+        ...(page.props.settings?.logo_url ? { logo: page.props.settings.logo_url } : {}),
+        ...(sameAs.length ? { sameAs } : {}),
+        description: heroDescription,
+    };
+});
 
 const features = [
     {
@@ -59,7 +78,11 @@ const colorMap = {
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <SeoHead
+        :title="`${siteName} — Global Alumni Network`"
+        :description="heroDescription"
+        :json-ld="organizationJsonLd"
+    />
 
     <div class="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
@@ -74,6 +97,7 @@ const colorMap = {
                 <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600 dark:text-gray-300">
                     <a href="#features" class="hover:text-accent-500 transition">Features</a>
                     <a href="#about" class="hover:text-accent-500 transition">About</a>
+                    <Link :href="route('blog.index')" class="hover:text-accent-500 transition">Blog</Link>
                     <Link :href="route('transparency.index')" class="hover:text-accent-500 transition">Transparency</Link>
                 </div>
 
@@ -341,43 +365,6 @@ const colorMap = {
             </div>
         </section>
 
-        <!-- ── Footer ── -->
-        <footer class="bg-gray-900 text-gray-400 py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <div class="md:col-span-2">
-                        <div class="text-2xl font-bold text-accent-500 mb-3">
-                            {{ $page.props.settings?.site_name || 'UNIKOSA' }}
-                        </div>
-                        <p class="text-sm leading-relaxed">
-                            The official alumni platform for the UNIKOSA community —
-                            connecting graduates from every set and every corner of the world.
-                        </p>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-semibold mb-3 text-sm">Platform</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><Link :href="route('register')" class="hover:text-accent-400 transition">Join the Network</Link></li>
-                            <li><Link :href="route('login')" class="hover:text-accent-400 transition">Sign In</Link></li>
-                            <li><Link :href="route('claim-profile.show')" class="hover:text-accent-400 transition">Claim Profile</Link></li>
-                            <li><Link :href="route('transparency.index')" class="hover:text-accent-400 transition">Transparency</Link></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-semibold mb-3 text-sm">Members</h4>
-                        <ul class="space-y-2 text-sm">
-                            <li><Link :href="route('directory')" class="hover:text-accent-400 transition">Directory</Link></li>
-                            <li><Link :href="route('events.index')" class="hover:text-accent-400 transition">Events</Link></li>
-                            <li><Link :href="route('forum.index')" class="hover:text-accent-400 transition">Forum</Link></li>
-                            <li><Link :href="route('jobs.index')" class="hover:text-accent-400 transition">Jobs</Link></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="border-t border-gray-800 pt-6 text-center text-xs">
-                    &copy; {{ new Date().getFullYear() }} {{ $page.props.settings?.site_name || 'UNIKOSA' }} Alumni Association. All rights reserved.
-                </div>
-            </div>
-        </footer>
-
+        <Footer />
     </div>
 </template>

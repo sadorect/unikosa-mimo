@@ -86,7 +86,10 @@ class PaymentController extends Controller
     {
         $reference = $request->query('reference');
         if ($reference) {
-            Payment::where('payment_reference', $reference)->update(['status' => 'failed']);
+            Payment::where('payment_reference', $reference)
+                ->where('user_id', $request->user()->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'failed']);
         }
 
         return redirect()->route('dashboard')->with('error', 'Payment was cancelled.');
@@ -100,6 +103,38 @@ class PaymentController extends Controller
         return response()->json([
             'status' => $payment?->status,
             'payment_id' => $payment?->id,
+        ]);
+    }
+
+    public function dues(Request $request)
+    {
+        $user = $request->user();
+
+        $paidDueIds = Payment::where('user_id', $user->id)
+            ->where('payable_type', Due::class)
+            ->where('status', 'successful')
+            ->pluck('payable_id');
+
+        $dues = Due::where(function ($query) use ($user) {
+            $query->where('set_id', $user->graduating_set_id)
+                ->orWhere('chapter_id', $user->chapter_id)
+                ->orWhere(function ($query) {
+                    $query->whereNull('set_id')->whereNull('chapter_id');
+                });
+        })
+            ->whereNotIn('id', $paidDueIds)
+            ->latest()
+            ->get();
+
+        return Inertia::render('Payments/Dues', [
+            'dues' => $dues,
+        ]);
+    }
+
+    public function showDue(Due $due)
+    {
+        return Inertia::render('Payments/PayDue', [
+            'due' => $due,
         ]);
     }
 
@@ -117,7 +152,7 @@ class PaymentController extends Controller
 
     public function receipt(Payment $payment)
     {
-        if ($payment->user_id !== auth()->id() && !auth()->user()->hasRole('super_admin')) {
+        if ($payment->user_id !== auth()->id() && !auth()->user()->can('manage payments')) {
             abort(403);
         }
 

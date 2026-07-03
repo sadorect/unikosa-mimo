@@ -1,5 +1,6 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps({ campaigns: Object });
@@ -40,6 +41,8 @@ const textPreview = (html) => (html || '').replace(/<[^>]*>/g, ' ').replace(/\s+
                         </div>
                     </div>
                 </div>
+
+                <Pagination :paginator="campaigns" />
             </div>
         </div>
     </AuthLayout>

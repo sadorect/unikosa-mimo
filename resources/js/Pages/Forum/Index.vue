@@ -1,8 +1,10 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Celebrations from '@/Components/Celebrations.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps({ posts: Object, groups: Array });
+defineProps({ posts: Object, groups: Array, celebrations: { type: Array, default: () => [] } });
 </script>
 
 <template>
@@ -36,8 +38,11 @@ defineProps({ posts: Object, groups: Array });
                                 </div>
                             </Link>
                         </div>
+
+                        <Pagination :paginator="posts" />
                     </div>
-                    <div class="lg:col-span-1">
+                    <div class="lg:col-span-1 space-y-6">
+                        <Celebrations :items="celebrations" title="Celebrations" compact />
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
                             <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Groups</h3>
                             <div class="space-y-2">

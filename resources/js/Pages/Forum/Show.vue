@@ -1,6 +1,8 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { timeAgo } from '@/lib/date';
 
 const props = defineProps({
     post: Object,
@@ -19,11 +21,7 @@ const submitReply = () => {
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="post.title" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('forum.index')" class="text-accent-600 hover:text-accent-700 text-sm">Forum</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ post.group?.name }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Forum', href: route('forum.index') }, { label: post.group?.name || 'Discussion' }]" />
         </template>
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
@@ -34,7 +32,7 @@ const submitReply = () => {
                         </div>
                         <div>
                             <div class="font-medium text-gray-900 dark:text-gray-100">{{ post.author?.name }}</div>
-                            <div class="text-xs text-gray-500">{{ post.created_at }}</div>
+                            <div class="text-xs text-gray-500">{{ timeAgo(post.created_at) }}</div>
                         </div>
                     </div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">{{ post.title }}</h1>
@@ -53,7 +51,7 @@ const submitReply = () => {
                                 {{ reply.author?.name?.charAt(0) }}
                             </div>
                             <span class="font-medium text-gray-900 dark:text-gray-100 text-sm">{{ reply.author?.name }}</span>
-                            <span class="text-xs text-gray-500">{{ reply.created_at }}</span>
+                            <span class="text-xs text-gray-500">{{ timeAgo(reply.created_at) }}</span>
                         </div>
                         <div class="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-wrap">{{ reply.body }}</div>
                     </div>

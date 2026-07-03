@@ -1,9 +1,27 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import Breadcrumb from '@/Components/Breadcrumb.vue';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 const props = defineProps({ event: Object, userRsvp: Object });
+
+const isOwnUnapprovedEvent = computed(() =>
+    props.event.status !== 'approved' && props.event.created_by === usePage().props.auth?.user?.id
+);
+
+const statusBanner = computed(() => {
+    switch (props.event.status) {
+        case 'pending':
+            return { text: 'This event is awaiting admin review and is not visible to other members yet.', class: 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300' };
+        case 'changes_requested':
+            return { text: `Changes requested: ${props.event.feedback}`, class: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300' };
+        case 'rejected':
+            return { text: `This event was not approved. Reason: ${props.event.feedback}`, class: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-300' };
+        default:
+            return null;
+    }
+});
 
 const rsvpForm = useForm({ status: 'going' });
 const ticketForm = useForm({ payment_method: 'paystack' });
@@ -17,24 +35,28 @@ const buyTicket = () => {
     ticketForm.post(route('events.ticket', props.event.id));
 };
 
-const goingCount = props.event.rsvps?.filter(r => r.pivot?.status === 'going').length || 0;
+const goingCount = props.event.rsvps_going_count || 0;
 </script>
 
 <template>
     <AuthLayout :auth="$page.props.auth" :settings="$page.props.settings">
         <Head :title="event.title" />
         <template #header>
-            <div class="flex items-center gap-2">
-                <Link :href="route('events.index')" class="text-accent-600 hover:text-accent-700 text-sm">Events</Link>
-                <span class="text-gray-400">/</span>
-                <span class="text-gray-700 dark:text-gray-300 text-sm">{{ event.title }}</span>
-            </div>
+            <Breadcrumb :items="[{ label: 'Events', href: route('events.index') }, { label: event.title }]" />
         </template>
         <div class="py-12">
             <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
+                <div v-if="isOwnUnapprovedEvent && statusBanner" class="mb-6 border px-4 py-3 rounded-lg text-sm flex items-center justify-between gap-4" :class="statusBanner.class">
+                    <span>{{ statusBanner.text }}</span>
+                    <Link v-if="['pending', 'changes_requested'].includes(event.status)" :href="route('events.edit', event.id)" class="font-medium underline whitespace-nowrap">Edit event</Link>
+                </div>
+
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-                    <div class="h-48 bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center">
-                        <div class="text-center text-white">
+                    <div class="h-48 flex items-center justify-center relative bg-cover bg-center"
+                        :class="event.cover_image ? '' : 'bg-gradient-to-br from-accent-400 to-accent-600'"
+                        :style="event.cover_image ? { backgroundImage: `url(${event.cover_image})` } : {}">
+                        <div v-if="event.cover_image" class="absolute inset-0 bg-black/30"></div>
+                        <div class="relative text-center text-white">
                             <div class="text-5xl font-bold">{{ event.start_at ? new Date(event.start_at).getDate() : '' }}</div>
                             <div class="text-xl">{{ event.start_at ? new Date(event.start_at).toLocaleString('default', { month: 'long', year: 'numeric' }) : '' }}</div>
                         </div>

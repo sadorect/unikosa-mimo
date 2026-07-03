@@ -20,7 +20,7 @@ class User extends Authenticatable implements FilamentUser
     use HasFactory, Notifiable, HasRoles, SoftDeletes, HasApiTokens;
 
     protected $fillable = [
-        'name', 'email', 'phone', 'password', 'date_of_birth',
+        'name', 'email', 'phone', 'password', 'date_of_birth', 'wedding_anniversary',
         'gender', 'graduating_set_id', 'house', 'country', 'city',
         'profession', 'bio', 'skills', 'social_links', 'avatar',
         'status', 'chapter_id', 'imported', 'account_claimed',
@@ -37,6 +37,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'date_of_birth' => 'date',
+            'wedding_anniversary' => 'date',
             'skills' => 'array',
             'social_links' => 'array',
             'imported' => 'boolean',
@@ -48,7 +49,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->status === 'approved' || $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin']);
+        return $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin']);
     }
 
     public function graduatingSet(): BelongsTo

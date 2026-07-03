@@ -1,5 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <PublicLayout current="transparency">
+    <SeoHead
+      title="Financial Transparency"
+      :description="`Public summary of ${$page.props.settings?.site_name || 'UNIKOSA'} alumni association finances — total raised, contributors, and active campaigns, published ${publishedAt}.`"
+    />
+
     <div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
       <div class="mb-10 text-center">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Financial Transparency</h1>
@@ -70,10 +75,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </PublicLayout>
 </template>
 
 <script setup>
+import PublicLayout from '@/Layouts/PublicLayout.vue';
+import SeoHead from '@/Components/SeoHead.vue';
+
 defineProps({
   totalRaised: Number,
   totalDonors: Number,

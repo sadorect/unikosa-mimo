@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\ForumPostResource\Pages;
 use App\Models\ForumPost;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class ForumPostResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = ['manage forum', 'moderate content'];
+
     protected static ?string $model = ForumPost::class;
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     protected static ?string $navigationGroup = 'Content';

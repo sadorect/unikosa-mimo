@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\DueResource\Pages;
 use App\Models\Due;
 use Filament\Forms;
@@ -12,6 +13,10 @@ use Filament\Tables\Table;
 
 class DueResource extends Resource
 {
+    use HasPermissionGuardedResource;
+
+    protected static string|array $permission = 'manage payments';
+
     protected static ?string $model = Due::class;
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
     protected static ?string $navigationGroup = 'Finance';

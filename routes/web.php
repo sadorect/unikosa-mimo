@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\AccountStatusController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\CaptchaController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\ClaimProfileController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DirectoryController;
@@ -13,10 +16,16 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\LegalController;
+use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SetController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TransparencyController;
 use Illuminate\Support\Facades\Route;
 
@@ -37,15 +46,48 @@ Route::post('/claim-profile/verify', [ClaimProfileController::class, 'verifyOtp'
     ->name('claim-profile.verify');
 
 Route::get('/transparency', [TransparencyController::class, 'index'])->name('transparency.index');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/manifest.webmanifest', [ManifestController::class, 'index'])->name('manifest');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/captcha', [CaptchaController::class, 'generate'])
+    ->middleware('throttle:30,1')
+    ->name('captcha.generate');
+
+Route::middleware('module:blog')->group(function () {
+    Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/account/pending', [AccountStatusController::class, 'pending'])->name('account.pending');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/privacy', [ProfileController::class, 'updatePrivacy'])->name('profile.privacy.update');
+    Route::get('/profile/export', [DataExportController::class, 'index'])->name('profile.export');
+    Route::get('/profile/export/download', [DataExportController::class, 'exportMyData'])->name('profile.export.download');
+});
+
+Route::middleware(['auth', 'verified', 'approved'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/directory', [DirectoryController::class, 'index'])->name('directory');
+    Route::get('/members/{user}', [MemberController::class, 'show'])->name('members.show');
+
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user}', [MessageController::class, 'show'])->name('messages.show');
+    Route::post('/messages/{user}', [MessageController::class, 'store'])->name('messages.store');
 
     Route::middleware('module:events')->group(function () {
         Route::get('/events', [EventController::class, 'index'])->name('events.index');
-        Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
-        Route::post('/events', [EventController::class, 'store'])->name('events.store');
+
+        Route::middleware('permission:manage events')->group(function () {
+            Route::get('/events/create', [EventController::class, 'create'])->name('events.create');
+            Route::post('/events', [EventController::class, 'store'])->name('events.store');
+            Route::get('/events/mine', [EventController::class, 'mine'])->name('events.mine');
+            Route::get('/events/{event}/edit', [EventController::class, 'edit'])->name('events.edit');
+            Route::put('/events/{event}', [EventController::class, 'update'])->name('events.update');
+        });
+
         Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
         Route::post('/events/{event}/rsvp', [EventController::class, 'rsvp'])->name('events.rsvp');
         Route::post('/events/{event}/ticket', [EventController::class, 'purchaseTicket'])->name('events.ticket');
@@ -61,10 +103,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware('module:blog')->group(function () {
-        Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
         Route::get('/blog/create', [BlogController::class, 'create'])->name('blog.create');
         Route::post('/blog', [BlogController::class, 'store'])->name('blog.store');
-        Route::get('/blog/{post:slug}', [BlogController::class, 'show'])->name('blog.show');
     });
 
     Route::middleware('module:job_board')->group(function () {
@@ -104,25 +144,33 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 
     Route::get('/payments/history', [PaymentController::class, 'history'])->name('payments.history');
+    Route::get('/payments/dues', [PaymentController::class, 'dues'])->name('payments.dues.index');
+    Route::get('/payments/dues/{due}', [PaymentController::class, 'showDue'])->name('payments.dues.show');
     Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('payments.receipt');
     Route::post('/payments/due/{due}', [PaymentController::class, 'payDue'])->name('payments.due');
     Route::post('/payments/campaign/{campaign}', [PaymentController::class, 'payCampaign'])->name('payments.campaign');
     Route::get('/payments/success', [PaymentController::class, 'success'])->name('payments.success');
     Route::get('/payments/cancel', [PaymentController::class, 'cancel'])->name('payments.cancel');
     Route::post('/payments/verify/paystack', [PaymentController::class, 'verifyPaystack'])->name('payments.verify.paystack');
-
-    Route::get('/profile', function () { return inertia('Profile/Edit'); })->name('profile.edit');
-    Route::get('/profile/export', [DataExportController::class, 'index'])->name('profile.export');
-    Route::get('/profile/export/download', [DataExportController::class, 'exportMyData'])->name('profile.export.download');
 });
 
-Route::get('/search', [SearchController::class, 'global'])->name('search.global');
+Route::middleware(['auth', 'verified'])->get('/search', [SearchController::class, 'global'])->name('search.global');
+
+Route::get('/privacy-policy', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/terms-of-service', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/contact', [ContactController::class, 'show'])->name('legal.contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware(['throttle:5,1', \App\Http\Middleware\VerifyCaptcha::class])
+    ->name('contact.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::middleware('role:super_admin')->group(function () {
+    Route::middleware('permission:view financial reports')->group(function () {
         Route::get('/admin/financial-reports', [FinancialReportController::class, 'index'])->name('admin.reports.index');
         Route::get('/admin/financial-reports/summary', [FinancialReportController::class, 'summary'])->name('admin.reports.summary');
         Route::get('/admin/financial-reports/export', [FinancialReportController::class, 'export'])->name('admin.reports.export');
+    });
+
+    Route::middleware('permission:manage members')->group(function () {
         Route::get('/admin/export-users', [DataExportController::class, 'adminExportUsers'])->name('admin.export.users');
     });
 });

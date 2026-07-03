@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Chapter;
+use App\Support\Celebrations;
 
 class ChapterController extends Controller
 {
@@ -26,6 +27,7 @@ class ChapterController extends Controller
         return \Inertia\Inertia::render('Chapters/Show', [
             'chapter' => $chapter,
             'members' => $members,
+            'celebrations' => Celebrations::upcoming(30, chapterId: $chapter->id),
         ]);
     }
 }

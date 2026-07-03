@@ -1,6 +1,8 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { timeAgo } from '@/lib/date';
 
 defineProps({ group: Object, posts: Object });
 </script>
@@ -29,9 +31,11 @@ defineProps({ group: Object, posts: Object });
                         </div>
                         <h3 class="font-semibold text-lg text-gray-900 dark:text-gray-100">{{ post.title }}</h3>
                         <p class="text-gray-600 dark:text-gray-400 mt-1 line-clamp-2">{{ post.body }}</p>
-                        <div class="mt-2 text-xs text-gray-400">{{ post.created_at }}</div>
+                        <div class="mt-2 text-xs text-gray-400">{{ timeAgo(post.created_at) }}</div>
                     </Link>
                 </div>
+
+                <Pagination :paginator="posts" />
             </div>
         </div>
     </AuthLayout>

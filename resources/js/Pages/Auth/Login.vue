@@ -1,14 +1,19 @@
 <script setup>
 import GuestLayout from '@/Layouts/GuestLayout.vue';
+import PasswordInput from '@/Components/PasswordInput.vue';
+import CaptchaField from '@/Components/CaptchaField.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({ canResetPassword: Boolean, status: String });
 
-const form = useForm({ email: '', password: '' });
+const captcha = ref(null);
+const form = useForm({ email: '', password: '', captcha_id: '', captcha_answer: '' });
 
 const submit = () => {
     form.post(route('login'), {
         onFinish: () => form.reset('password'),
+        onError: () => captcha.value?.refresh(),
     });
 };
 </script>
@@ -37,12 +42,19 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
-                    <input v-model="form.password" type="password" autocomplete="current-password"
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <Link v-if="canResetPassword" :href="route('password.request')" class="text-xs text-accent-600 hover:text-accent-700 font-medium">
+                            Forgot your password?
+                        </Link>
+                    </div>
+                    <PasswordInput v-model="form.password" autocomplete="current-password"
                         class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition"
                         required placeholder="••••••••" />
                     <p v-if="form.errors.password" class="mt-1 text-xs text-red-500">{{ form.errors.password }}</p>
                 </div>
+
+                <CaptchaField ref="captcha" form="login" v-model:id="form.captcha_id" v-model:answer="form.captcha_answer" :error="form.errors.captcha_answer" />
 
                 <button type="submit"
                     class="w-full bg-accent-500 hover:bg-accent-600 text-white font-semibold py-2.5 px-4 rounded-lg transition disabled:opacity-60"

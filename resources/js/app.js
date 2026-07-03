@@ -30,3 +30,11 @@ createInertiaApp({
         color: '#F59E0B',
     },
 });
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Installability degrades gracefully; a failed registration isn't fatal.
+        });
+    });
+}

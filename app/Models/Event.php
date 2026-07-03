@@ -16,9 +16,10 @@ class Event extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'title', 'slug', 'description', 'location', 'is_virtual',
+        'title', 'slug', 'description', 'cover_image', 'location', 'is_virtual',
         'livestream_url', 'start_at', 'end_at', 'is_paid',
-        'ticket_price', 'ticket_currency', 'chapter_id', 'created_by', 'capacity',
+        'ticket_price', 'ticket_currency', 'chapter_id', 'set_id', 'created_by', 'capacity',
+        'status', 'feedback', 'reviewed_by', 'reviewed_at',
     ];
 
     protected function description(): Attribute
@@ -33,6 +34,7 @@ class Event extends Model
         'end_at' => 'datetime',
         'ticket_price' => 'integer',
         'capacity' => 'integer',
+        'reviewed_at' => 'datetime',
     ];
 
     protected static function boot(): void
@@ -50,9 +52,19 @@ class Event extends Model
         return $this->belongsTo(Chapter::class);
     }
 
+    public function set(): BelongsTo
+    {
+        return $this->belongsTo(Set::class);
+    }
+
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 
     public function rsvps(): BelongsToMany

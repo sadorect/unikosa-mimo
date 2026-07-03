@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Setting;
 use App\Models\UnikosaNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -18,6 +19,8 @@ class HandleInertiaRequests extends Middleware
 
     public function share(Request $request): array
     {
+        $logoPath = Setting::get('logo_path');
+
         return [
             ...parent::share($request),
             'auth' => [
@@ -25,6 +28,7 @@ class HandleInertiaRequests extends Middleware
                     'id' => $request->user()->id,
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
+                    'avatar' => $request->user()->avatar,
                     'status' => $request->user()->status,
                     'roles' => $request->user()->getRoleNames()->toArray(),
                 ] : null,
@@ -34,6 +38,7 @@ class HandleInertiaRequests extends Middleware
                 'accent_color' => Setting::get('accent_color', '#F59E0B'),
                 'theme_mode' => Setting::get('theme_mode', 'light'),
                 'font_family' => Setting::get('font_family', 'Inter'),
+                'logo_url' => $logoPath ? Storage::disk(config('filesystems.media_disk'))->url($logoPath) : null,
                 'social' => [
                     'facebook' => Setting::get('social_facebook'),
                     'twitter' => Setting::get('social_twitter'),
@@ -45,6 +50,11 @@ class HandleInertiaRequests extends Middleware
             'notifications' => [
                 'unread_count' => fn () => $request->user()
                     ? UnikosaNotification::where('user_id', $request->user()->id)->whereNull('read_at')->count()
+                    : 0,
+            ],
+            'messages' => [
+                'unread_count' => fn () => $request->user()
+                    ? \App\Models\Message::where('recipient_id', $request->user()->id)->whereNull('read_at')->count()
                     : 0,
             ],
             'flash' => [

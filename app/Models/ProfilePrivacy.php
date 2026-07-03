@@ -9,9 +9,12 @@ class ProfilePrivacy extends Model
 {
     use HasFactory;
 
+    protected $table = 'profile_privacy';
+
     protected $fillable = [
         'user_id', 'show_email', 'show_phone', 'show_dob',
         'show_profession', 'show_skills', 'show_social_links', 'show_location',
+        'notify_email_messages',
     ];
 
     protected $casts = [
@@ -22,6 +25,7 @@ class ProfilePrivacy extends Model
         'show_skills' => 'boolean',
         'show_social_links' => 'boolean',
         'show_location' => 'boolean',
+        'notify_email_messages' => 'boolean',
     ];
 
     public function user()

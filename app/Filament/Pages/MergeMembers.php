@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\HasPermissionGuardedPage;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,6 +11,10 @@ use Filament\Pages\Page;
 
 class MergeMembers extends Page
 {
+    use HasPermissionGuardedPage;
+
+    protected static string|array $permission = 'manage members';
+
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
     protected static ?string $navigationGroup = 'Management';
     protected static ?int $navigationSort = 7;
