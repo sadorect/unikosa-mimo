@@ -19,7 +19,7 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LegalController;
-use App\Http\Controllers\ManifestController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NotificationController;
@@ -49,7 +49,9 @@ Route::post('/claim-profile/verify', [ClaimProfileController::class, 'verifyOtp'
 
 Route::get('/transparency', [TransparencyController::class, 'index'])->name('transparency.index');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::get('/manifest.webmanifest', [ManifestController::class, 'index'])->name('manifest');
+Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('manifest');
+Route::get('/sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
+Route::get('/offline', [PwaController::class, 'offline'])->name('pwa.offline');
 
 Route::get('/captcha', [CaptchaController::class, 'generate'])
     ->middleware('throttle:30,1')
