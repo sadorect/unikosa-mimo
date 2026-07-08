@@ -13,6 +13,6 @@ class ManualListRule implements RuleInterface
 {
     public function passes(User $user, array $config): bool
     {
-        return in_array($user->id, $config['user_ids'] ?? [], true);
+        return in_array($user->id, array_map('intval', $config['user_ids'] ?? []), true);
     }
 }

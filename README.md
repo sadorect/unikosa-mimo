@@ -168,6 +168,13 @@ php artisan test          # or: docker compose exec app php artisan test
 Tests run against an in-memory SQLite database (PostgreSQL `tsvector` full-text
 indexes are skipped outside `pgsql`).
 
+## Operations runbooks
+
+- [Switching asset storage to Cloudflare R2](docs/r2-migration-runbook.md) —
+  step-by-step cutover using `assets:sync-r2` and `assets:rewrite-urls`.
+- [Email & queue worker](docs/mail-and-queue-worker.md) — SMTP setup and the
+  required queue worker (systemd / supervisor / cron options).
+
 ## License
 
 Proprietary — All rights reserved.

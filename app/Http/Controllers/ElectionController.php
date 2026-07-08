@@ -47,6 +47,13 @@ class ElectionController extends Controller
             ->get()
             ->keyBy('position_id');
 
+        // A member may only hold one active candidacy per election at a time — running for
+        // a second office requires withdrawing (or being rejected from) the first.
+        $hasActiveCandidacyElsewhere = fn (int $positionId) => $myCandidacies
+            ->except($positionId)
+            ->whereIn('status', ['pending', 'approved'])
+            ->isNotEmpty();
+
         $nominablePositions = [];
         foreach ($election->positions as $position) {
             $existingCandidacy = $myCandidacies->get($position->id);
@@ -60,14 +67,21 @@ class ElectionController extends Controller
 
             $nominablePositions[$position->id] = $election->isNominationWindowOpen()
                 && $canApplyOrResubmit
+                && ! $hasActiveCandidacyElsewhere($position->id)
                 && $this->eligibilityService->passes($user, $position, 'candidacy');
         }
+
+        $activeCandidacy = $myCandidacies->whereIn('status', ['pending', 'approved'])->first();
+        $activeCandidacyPositionTitle = $activeCandidacy
+            ? $election->positions->firstWhere('id', $activeCandidacy->position_id)?->title
+            : null;
 
         return Inertia::render('Elections/Show', [
             'election' => $election,
             'hasVoted' => $hasVoted,
             'canVote' => $canVote,
             'nominablePositions' => $nominablePositions,
+            'activeCandidacyPositionTitle' => $activeCandidacyPositionTitle,
             'myCandidacies' => $myCandidacies->map(fn (Candidate $c) => [
                 'id' => $c->id,
                 'position_id' => $c->position_id,

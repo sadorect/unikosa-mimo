@@ -33,6 +33,15 @@ class CandidateController extends Controller
         $existing = Candidate::where('position_id', $position->id)->where('user_id', $user->id)->first();
         abort_if($existing && $existing->status !== 'pending', 409, 'You cannot resubmit for this position.');
 
+        // A member may only hold one active candidacy per election — running for a second
+        // office requires withdrawing (or having been rejected from) the first.
+        $activeElsewhereInElection = Candidate::where('user_id', $user->id)
+            ->where('position_id', '!=', $position->id)
+            ->whereIn('position_id', $election->positions()->pluck('id'))
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+        abort_if($activeElsewhereInElection, 409, 'You already have an active nomination for another position in this election. Withdraw it first if you want to run for a different position.');
+
         $validated = $request->validate([
             'manifesto' => 'nullable|string|max:5000',
             'photo' => 'nullable|image|max:5120',
@@ -41,6 +50,7 @@ class CandidateController extends Controller
         if ($request->hasFile('photo')) {
             $disk = config('filesystems.media_disk');
             $path = $request->file('photo')->store('candidates', $disk);
+            abort_if(! $path, 500, 'Failed to save your photo. Please try again.');
             $validated['photo'] = Storage::disk($disk)->url($path);
         }
 

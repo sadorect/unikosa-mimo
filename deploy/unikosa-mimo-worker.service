@@ -1,0 +1,27 @@
+; systemd unit — persistent queue worker for unikosa-mimo (national).
+; Preferred for production: a long-running worker is more responsive than the
+; cron fallback. Install with root:
+;
+;   sudo cp deploy/unikosa-mimo-worker.service /etc/systemd/system/
+;   sudo systemctl daemon-reload
+;   sudo systemctl enable --now unikosa-mimo-worker
+;   sudo systemctl status unikosa-mimo-worker
+;
+; After a deploy that changes code, restart it:  sudo systemctl restart unikosa-mimo-worker
+
+[Unit]
+Description=Unikosa (national) Laravel queue worker
+After=network.target redis-server.service
+
+[Service]
+User=deploy
+Group=deploy
+Restart=always
+RestartSec=5
+WorkingDirectory=/home/unikosa/unikosa-mimo
+ExecStart=/usr/bin/php /home/unikosa/unikosa-mimo/artisan queue:work redis --sleep=3 --tries=3 --max-time=3600 --timeout=120
+StandardOutput=append:/home/unikosa/unikosa-mimo/storage/logs/worker.log
+StandardError=append:/home/unikosa/unikosa-mimo/storage/logs/worker.log
+
+[Install]
+WantedBy=multi-user.target

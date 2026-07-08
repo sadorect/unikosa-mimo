@@ -9,6 +9,7 @@ const props = defineProps({
     hasVoted: Boolean,
     canVote: Boolean,
     nominablePositions: Object,
+    activeCandidacyPositionTitle: String,
     myCandidacies: Object,
 });
 
@@ -117,6 +118,11 @@ const submitBallot = () => {
                             @click="withdrawCandidacy(myCandidacies[position.id].id)"
                             class="text-xs text-red-500 hover:text-red-600 mt-2">Withdraw nomination</button>
                     </div>
+
+                    <p v-if="!myCandidacies[position.id] && !nominablePositions[position.id] && activeCandidacyPositionTitle"
+                        class="text-xs text-gray-400 mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        You already have an active nomination for {{ activeCandidacyPositionTitle }}. Withdraw it to run for this position instead.
+                    </p>
 
                     <div v-if="nominablePositions[position.id]" class="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
                         <button v-if="openNominationForm !== position.id" @click="startNomination(position.id)"

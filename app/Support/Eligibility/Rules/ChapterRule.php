@@ -12,6 +12,6 @@ class ChapterRule implements RuleInterface
 {
     public function passes(User $user, array $config): bool
     {
-        return in_array($user->chapter_id, $config['chapter_ids'] ?? [], true);
+        return in_array($user->chapter_id, array_map('intval', $config['chapter_ids'] ?? []), true);
     }
 }

@@ -12,6 +12,6 @@ class SetListRule implements RuleInterface
 {
     public function passes(User $user, array $config): bool
     {
-        return in_array($user->graduating_set_id, $config['set_ids'] ?? [], true);
+        return in_array($user->graduating_set_id, array_map('intval', $config['set_ids'] ?? []), true);
     }
 }

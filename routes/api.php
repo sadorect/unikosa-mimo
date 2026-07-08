@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\DirectoryController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\JobController;
 use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\SsoController;
 use App\Http\Controllers\ClaimProfileController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
@@ -44,5 +45,11 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/profile', [AuthController::class, 'profile']);
         Route::put('/profile', [AuthController::class, 'updateProfile']);
+    });
+
+    // OAuth2 (Passport) resource endpoint — consumed by satellite chapter
+    // sites (e.g. Unikosana NA) after the "Login with Unikosa" redirect flow.
+    Route::middleware('auth:api')->group(function () {
+        Route::get('/oauth/user', [SsoController::class, 'user']);
     });
 });
