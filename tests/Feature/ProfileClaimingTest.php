@@ -55,7 +55,7 @@ class ProfileClaimingTest extends TestCase
     public function test_member_claims_profile_with_valid_otp(): void
     {
         $user = $this->importedUser();
-        $user->forceFill(['remember_token' => 'claim_ABC123'])->save();
+        $user->forceFill(['remember_token' => 'claim_ABC123_' . now()->timestamp])->save();
 
         $this->post('/claim-profile/verify', [
             'user_id' => $user->id,
@@ -73,7 +73,7 @@ class ProfileClaimingTest extends TestCase
     public function test_invalid_otp_is_rejected(): void
     {
         $user = $this->importedUser();
-        $user->forceFill(['remember_token' => 'claim_ABC123'])->save();
+        $user->forceFill(['remember_token' => 'claim_ABC123_' . now()->timestamp])->save();
 
         $this->postJson('/claim-profile/verify', [
             'user_id' => $user->id,

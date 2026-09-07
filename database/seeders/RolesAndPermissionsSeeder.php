@@ -32,25 +32,28 @@ class RolesAndPermissionsSeeder extends Seeder
             'moderate elections',
         ];
 
+        // firstOrCreate, not create: several permissions ('moderate events', the
+        // election ones) are already introduced by migrations, so a plain create
+        // collides on any freshly-migrated database.
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission, 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        Role::create(['name' => 'super_admin', 'guard_name' => 'web'])
-            ->givePermissionTo(Permission::all());
+        Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web'])
+            ->syncPermissions(Permission::all());
 
-        Role::create(['name' => 'set_representative', 'guard_name' => 'web'])
-            ->givePermissionTo(['manage members', 'manage events']);
+        Role::firstOrCreate(['name' => 'set_representative', 'guard_name' => 'web'])
+            ->syncPermissions(['manage members', 'manage events']);
 
-        Role::create(['name' => 'chapter_head', 'guard_name' => 'web'])
-            ->givePermissionTo(['manage events']);
+        Role::firstOrCreate(['name' => 'chapter_head', 'guard_name' => 'web'])
+            ->syncPermissions(['manage events']);
 
-        Role::create(['name' => 'content_moderator', 'guard_name' => 'web'])
-            ->givePermissionTo(['moderate content', 'manage forum', 'manage blog', 'moderate events', 'moderate elections']);
+        Role::firstOrCreate(['name' => 'content_moderator', 'guard_name' => 'web'])
+            ->syncPermissions(['moderate content', 'manage forum', 'manage blog', 'moderate events', 'moderate elections']);
 
-        Role::create(['name' => 'finance_admin', 'guard_name' => 'web'])
-            ->givePermissionTo(['manage campaigns', 'manage payments', 'view financial reports', 'manage settings']);
+        Role::firstOrCreate(['name' => 'finance_admin', 'guard_name' => 'web'])
+            ->syncPermissions(['manage campaigns', 'manage payments', 'view financial reports', 'manage settings']);
 
-        Role::create(['name' => 'member', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
     }
 }
