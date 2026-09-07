@@ -8,6 +8,7 @@ use App\Support\ErrorPage;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
@@ -89,8 +90,8 @@ class ErrorPageTest extends TestCase
      * route x could not be found" was reaching members, which tells them
      * nothing and tells everyone else how the app is put together.
      *
-     * @dataProvider internalMessages
      */
+    #[DataProvider('internalMessages')]
     public function test_framework_internals_never_reach_the_page(string $message): void
     {
         $page = ErrorPage::for(404, new HttpException(404, $message));
@@ -113,7 +114,7 @@ class ErrorPageTest extends TestCase
         ];
     }
 
-    /** @dataProvider writtenMessages */
+    #[DataProvider('writtenMessages')]
     public function test_messages_written_for_members_are_shown(string $message): void
     {
         $page = ErrorPage::for(403, new HttpException(403, $message));

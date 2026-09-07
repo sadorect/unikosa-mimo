@@ -121,6 +121,26 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                // Presence sits next to the name because "is this person around
+                // at all" changes how you read everything else in the row.
+                Tables\Columns\TextColumn::make('presence')
+                    ->label('')
+                    ->state(fn (User $record) => match ($record->presence()) {
+                        'online' => 'Online',
+                        'away' => 'Recently active',
+                        'offline' => 'Offline',
+                        default => 'Never signed in',
+                    })
+                    ->badge()
+                    ->color(fn (User $record) => match ($record->presence()) {
+                        'online' => 'success',
+                        'away' => 'warning',
+                        'offline' => 'gray',
+                        default => 'danger',
+                    })
+                    ->tooltip(fn (User $record) => $record->last_seen_at
+                        ? 'Last seen '.$record->last_seen_at->diffForHumans()
+                        : 'This account has never signed in.'),
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('email')->searchable(),
                 Tables\Columns\TextColumn::make('graduatingSet.name')->label('Set'),
@@ -136,7 +156,15 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge(),
                 Tables\Columns\TextColumn::make('reviewedBy.name')->label('Reviewed by')->placeholder('—')->toggleable(),
                 Tables\Columns\TextColumn::make('reviewed_at')->dateTime()->label('Reviewed at')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('created_at')->dateTime(),
+                // Relative for scanning, exact on hover for anything that has to
+                // be reported or acted on.
+                Tables\Columns\TextColumn::make('last_seen_at')
+                    ->label('Last seen')
+                    ->placeholder('Never')
+                    ->sortable()
+                    ->since()
+                    ->tooltip(fn (User $record) => $record->last_seen_at?->toDayDateTimeString()),
+                Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Joined')->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options(['pending' => 'Pending', 'approved' => 'Approved', 'rejected' => 'Rejected']),
@@ -144,6 +172,28 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('chapter_id')->relationship('chapter', 'name'),
                 Tables\Filters\TernaryFilter::make('imported')->label('Imported'),
                 Tables\Filters\TernaryFilter::make('account_claimed')->label('Claimed'),
+                Tables\Filters\SelectFilter::make('presence')
+                    ->label('Activity')
+                    ->options([
+                        'online' => 'Online now',
+                        'today' => 'Active today',
+                        'week' => 'Active this week',
+                        'month' => 'Active this month',
+                        'dormant' => 'Not seen in 30 days',
+                        'never' => 'Never signed in',
+                    ])
+                    ->query(fn (Builder $query, array $data) => match ($data['value'] ?? null) {
+                        'online' => $query->online(),
+                        'today' => $query->seenSince(now()->startOfDay()),
+                        'week' => $query->seenSince(now()->subWeek()),
+                        'month' => $query->seenSince(now()->subMonth()),
+                        // Dormant means seen once and then not since; an
+                        // account that never signed in is a different problem
+                        // and has its own option.
+                        'dormant' => $query->whereNotNull('last_seen_at')->where('last_seen_at', '<', now()->subDays(30)),
+                        'never' => $query->whereNull('last_seen_at'),
+                        default => $query,
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()

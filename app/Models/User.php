@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,7 +47,44 @@ class User extends Authenticatable implements FilamentUser
             'imported_at' => 'datetime',
             'claimed_at' => 'datetime',
             'reviewed_at' => 'datetime',
+            'last_seen_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Presence is "made an authenticated request recently" — the only claim a
+     * page-based application can honestly make without a websocket.
+     */
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at !== null
+            && $this->last_seen_at->gt(now()->subMinutes((int) config('presence.online_minutes')));
+    }
+
+    /** One of: online, away, offline, never. */
+    public function presence(): string
+    {
+        if ($this->last_seen_at === null) {
+            return 'never';
+        }
+
+        if ($this->isOnline()) {
+            return 'online';
+        }
+
+        return $this->last_seen_at->gt(now()->subMinutes((int) config('presence.away_minutes')))
+            ? 'away'
+            : 'offline';
+    }
+
+    public function scopeOnline(Builder $query): Builder
+    {
+        return $query->where('last_seen_at', '>', now()->subMinutes((int) config('presence.online_minutes')));
+    }
+
+    public function scopeSeenSince(Builder $query, $since): Builder
+    {
+        return $query->where('last_seen_at', '>=', $since);
     }
 
     public function canAccessPanel(Panel $panel): bool
