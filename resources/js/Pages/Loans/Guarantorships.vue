@@ -86,9 +86,16 @@ const statusLabel = {
                         </div>
                     </div>
 
-                    <div v-else-if="request.status === 'accepted' && request.loan.outstanding > 0" class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4 text-sm text-gray-600 dark:text-gray-400">
-                        Outstanding: {{ request.loan.currency }} {{ formatMoney(request.loan.outstanding) }}
-                        <span v-if="request.loan.due_at"> · due {{ new Date(request.loan.due_at).toLocaleDateString() }}</span>
+                    <div v-else-if="request.status === 'accepted' && request.loan.outstanding > 0"
+                        class="mt-4 border-t border-gray-100 dark:border-gray-700 pt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+                        <span class="text-gray-600 dark:text-gray-400">
+                            Outstanding: {{ request.loan.currency }} {{ formatMoney(request.loan.outstanding) }}
+                            <span v-if="request.loan.due_at"> · due {{ new Date(request.loan.due_at).toLocaleDateString() }}</span>
+                        </span>
+                        <!-- The way in for a guarantor who has to pay on the borrower's behalf. -->
+                        <Link :href="route('loans.show', request.loan.id)" class="text-accent-600 hover:underline whitespace-nowrap">
+                            {{ ['overdue', 'in_grace', 'defaulted'].includes(request.loan.status) ? 'View or pay towards this loan' : 'View the loan' }}
+                        </Link>
                     </div>
                 </div>
 

@@ -18,6 +18,8 @@ use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanDocumentController;
+use App\Http\Controllers\LoanRepaymentController;
+use App\Http\Controllers\LoanStatementController;
 use App\Http\Controllers\LoanGuarantorController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
@@ -133,6 +135,9 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::delete('/loans/{loan}/guarantors/{guarantor}', [LoanGuarantorController::class, 'destroy'])->name('loans.guarantors.destroy');
 
         // Private-disk documents, streamed only to people entitled to the loan.
+        Route::post('/loans/{loan}/repayments', [LoanRepaymentController::class, 'store'])->name('loans.repayments.store');
+        Route::get('/loans/{loan}/statement', LoanStatementController::class)->name('loans.statement');
+
         Route::get('/loans/{loan}/proof/disbursement', [LoanDocumentController::class, 'disbursementProof'])->name('loans.proof.disbursement');
         Route::get('/loans/{loan}/proof/repayment/{repayment}', [LoanDocumentController::class, 'repaymentProof'])->name('loans.proof.repayment');
     });

@@ -7,6 +7,7 @@ use App\Models\LoanProgram;
 use App\Models\LoanGuarantor;
 use App\Services\LoanEligibilityService;
 use App\Services\LoanGuarantorService;
+use App\Services\LoanRepaymentService;
 use App\Services\LoanStateMachine;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -127,6 +128,18 @@ class LoanController extends Controller
                 'disbursement_reference' => $loan->disbursement_reference,
                 'grace_ends_at' => $loan->grace_ends_at,
                 'has_disbursement_proof' => $loan->disbursement_proof_path !== null,
+                'repayments' => $loan->repayments()->with('payer')->orderByDesc('paid_on')->get()->map(fn ($repayment) => [
+                    'id' => $repayment->id,
+                    'amount' => $repayment->amount,
+                    'paid_on' => $repayment->paid_on,
+                    'method' => $repayment->method,
+                    'reference' => $repayment->reference,
+                    'status' => $repayment->status,
+                    'rejection_reason' => $repayment->rejection_reason,
+                    'payer' => $repayment->payer?->name,
+                    'on_behalf' => $repayment->isOnBehalfOfBorrower(),
+                    'has_proof' => $repayment->proof_path !== null,
+                ]),
                 'applicant' => ['id' => $loan->applicant->id, 'name' => $loan->applicant->name],
                 'timeline' => $loan->transitions->map(fn ($transition) => [
                     'id' => $transition->id,
@@ -142,7 +155,12 @@ class LoanController extends Controller
                 'withdraw' => $request->user()->can('withdraw', $loan),
                 'review' => $request->user()->can('review', $loan),
                 'inviteGuarantors' => $isApplicant && $loan->status === 'guarantors_pending',
+                'recordRepayment' => $request->user()->can('recordRepayment', $loan)
+                    && app(LoanRepaymentService::class)->acceptsRepayments($loan),
+                'statement' => $loan->disbursed_at !== null,
             ],
+            'payerRole' => app(LoanRepaymentService::class)->payerRole($loan, $request->user()),
+            'repaymentMethods' => config('loans.repayment_methods'),
         ]);
     }
 

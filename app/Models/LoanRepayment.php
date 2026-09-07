@@ -18,7 +18,8 @@ class LoanRepayment extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'loan_id', 'amount', 'paid_on', 'method', 'reference', 'proof_path', 'note',
+        'loan_id', 'paid_by_user_id', 'payer_role',
+        'amount', 'paid_on', 'method', 'reference', 'proof_path', 'note',
         'recorded_by', 'status', 'confirmed_by', 'confirmed_at', 'rejection_reason',
     ];
 
@@ -36,6 +37,20 @@ class LoanRepayment extends Model
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
+    }
+
+    /**
+     * Whose money this was. A guarantor paying for a defaulting borrower is a
+     * different fact from a treasurer typing the row in, which is `recorder`.
+     */
+    public function payer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'paid_by_user_id');
+    }
+
+    public function isOnBehalfOfBorrower(): bool
+    {
+        return $this->payer_role === 'guarantor';
     }
 
     public function recorder(): BelongsTo

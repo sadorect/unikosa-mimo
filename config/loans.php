@@ -85,6 +85,10 @@ return [
 
     'repayment_statuses' => ['pending_confirmation', 'confirmed', 'rejected'],
 
+    // Who put the money up. A guarantor may pay on a defaulting borrower's
+    // behalf; an officer role covers a treasurer recording a cash handover.
+    'payer_roles' => ['borrower', 'guarantor', 'officer'],
+
     'program_statuses' => ['draft', 'active', 'paused', 'closed'],
 
     'officer_roles' => ['reviewer', 'disburser', 'treasurer'],

@@ -362,6 +362,7 @@ class LoanResource extends Resource
     {
         return [
             RelationManagers\GuarantorsRelationManager::class,
+            RelationManagers\RepaymentsRelationManager::class,
             RelationManagers\TransitionsRelationManager::class,
         ];
     }

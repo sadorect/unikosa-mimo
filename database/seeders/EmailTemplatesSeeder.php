@@ -155,6 +155,44 @@ class EmailTemplatesSeeder extends Seeder
                     . "If it is unpaid after {{ grace }}, the loan is recorded as in default and a notice may be published.",
                 'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'total', 'due', 'grace'],
             ],
+            [
+                'key' => 'loan_repayment_recorded',
+                'name' => 'Loan: Repayment Awaiting Confirmation',
+                'subject' => 'Repayment to confirm: {{ amount }} on {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ payer }} has recorded a {{ amount }} repayment against {{ borrower }}'s loan {{ reference }}.\n"
+                    . "Payment date: {{ paid_on }}.\n"
+                    . "It does not reduce the balance until you confirm the money arrived.",
+                'variables' => ['site_name', 'name', 'reference', 'borrower', 'payer', 'amount', 'paid_on'],
+            ],
+            [
+                'key' => 'loan_repayment_confirmed',
+                'name' => 'Loan: Repayment Confirmed',
+                'subject' => 'Repayment confirmed on {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "A repayment of {{ amount }} from {{ payer }} has been confirmed against loan {{ reference }}.\n"
+                    . "Outstanding balance: {{ outstanding }}.",
+                'variables' => ['site_name', 'name', 'reference', 'amount', 'payer', 'outstanding'],
+            ],
+            [
+                'key' => 'loan_repayment_rejected',
+                'name' => 'Loan: Repayment Not Confirmed',
+                'subject' => 'A repayment on {{ reference }} could not be confirmed',
+                'body' => "Hello {{ name }},\n"
+                    . "The fund could not match the {{ amount }} repayment you recorded to a payment it received.\n"
+                    . "Their note: {{ reason }}\n"
+                    . "The balance on the loan is unchanged.",
+                'variables' => ['site_name', 'name', 'reference', 'amount', 'reason'],
+            ],
+            [
+                'key' => 'loan_settled',
+                'name' => 'Loan: Settled',
+                'subject' => 'Loan {{ reference }} is fully repaid',
+                'body' => "Hello {{ name }},\n"
+                    . "Loan {{ reference }} is fully repaid and now closed. Total repaid: {{ total }}.\n"
+                    . "If you guaranteed this loan, your obligation has ended.",
+                'variables' => ['site_name', 'name', 'reference', 'total'],
+            ],
         ];
 
         foreach ($templates as $template) {

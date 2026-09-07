@@ -4,7 +4,7 @@ import AuthLayout from '@/Layouts/AuthLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { statusBadge, formatMoney } from '@/Pages/Loans/status';
 
-const props = defineProps({ loan: Object, can: Object });
+const props = defineProps({ loan: Object, can: Object, payerRole: String, repaymentMethods: Array });
 
 const editing = ref(false);
 
@@ -52,6 +52,33 @@ const revokeForm = useForm({});
 function revoke(guarantor) {
     revokeForm.delete(route('loans.guarantors.destroy', [props.loan.id, guarantor.id]), { preserveScroll: true });
 }
+
+// Recording a repayment. A guarantor sees the same form as the borrower —
+// standing for someone means being able to pay for them, not only being
+// nudged about it.
+const showRepaymentForm = ref(false);
+const repaymentForm = useForm({
+    amount: null,
+    paid_on: new Date().toISOString().slice(0, 10),
+    method: 'bank_transfer',
+    reference: '',
+    note: '',
+    proof: null,
+});
+
+function submitRepayment() {
+    repaymentForm.post(route('loans.repayments.store', props.loan.id), {
+        preserveScroll: true,
+        forceFormData: true,
+        onSuccess: () => { showRepaymentForm.value = false; repaymentForm.reset(); },
+    });
+}
+
+const repaymentStatus = {
+    pending_confirmation: { label: 'Awaiting confirmation', class: 'bg-yellow-100 text-yellow-800' },
+    confirmed: { label: 'Confirmed', class: 'bg-green-100 text-green-800' },
+    rejected: { label: 'Not confirmed', class: 'bg-red-100 text-red-800' },
+};
 
 const guarantorStatus = {
     invited: { label: 'Asked', class: 'bg-yellow-100 text-yellow-800' },
@@ -211,6 +238,93 @@ function withdraw() {
                             </li>
                         </ul>
                         <p v-else-if="search && !searching" class="text-sm text-gray-500 mt-2">No members of your set match that.</p>
+                    </div>
+                </div>
+
+                <div v-if="loan.repayments?.length || can.recordRepayment" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                    <div class="flex flex-wrap items-baseline justify-between gap-3">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Repayments</h3>
+                        <a v-if="can.statement" :href="route('loans.statement', loan.id)" class="text-sm text-accent-600 hover:underline">Download statement (PDF)</a>
+                    </div>
+
+                    <p v-if="payerRole === 'guarantor' && loan.outstanding > 0" class="mt-3 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/50 rounded-lg p-3">
+                        You are a guarantor on this loan. If {{ loan.applicant?.name }} does not repay it, you can pay towards the balance here;
+                        the amount is credited to the loan and recorded as yours.
+                    </p>
+
+                    <ul v-if="loan.repayments?.length" class="mt-4 space-y-2">
+                        <li v-for="repayment in loan.repayments" :key="repayment.id"
+                            class="flex flex-wrap items-start justify-between gap-2 text-sm border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0">
+                            <span class="min-w-0">
+                                <span class="text-gray-800 dark:text-gray-200">{{ loan.currency }} {{ formatMoney(repayment.amount) }}</span>
+                                <span class="text-gray-500"> · {{ new Date(repayment.paid_on).toLocaleDateString() }}</span>
+                                <span v-if="repayment.payer" class="block text-xs text-gray-500">
+                                    Paid by {{ repayment.payer }}<span v-if="repayment.on_behalf"> (guarantor)</span>
+                                </span>
+                                <span v-if="repayment.rejection_reason" class="block text-xs text-red-600">{{ repayment.rejection_reason }}</span>
+                            </span>
+                            <span class="flex items-center gap-3">
+                                <a v-if="repayment.has_proof" :href="route('loans.proof.repayment', [loan.id, repayment.id])" target="_blank"
+                                    class="text-xs text-accent-600 hover:underline">Proof</a>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap" :class="repaymentStatus[repayment.status]?.class">
+                                    {{ repaymentStatus[repayment.status]?.label || repayment.status }}
+                                </span>
+                            </span>
+                        </li>
+                    </ul>
+
+                    <div v-if="can.recordRepayment" class="mt-5 border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <button v-if="!showRepaymentForm" type="button" @click="showRepaymentForm = true"
+                            class="px-4 py-2 rounded-lg bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition">
+                            {{ payerRole === 'guarantor' ? 'Pay towards this loan' : 'Record a repayment' }}
+                        </button>
+
+                        <form v-else class="space-y-4" @submit.prevent="submitRepayment">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Amount ({{ loan.currency }})</label>
+                                    <input v-model.number="repaymentForm.amount" type="number" min="1" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm" />
+                                    <p v-if="repaymentForm.errors.amount" class="text-sm text-red-600 mt-1">{{ repaymentForm.errors.amount }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date paid</label>
+                                    <input v-model="repaymentForm.paid_on" type="date" required
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm" />
+                                    <p v-if="repaymentForm.errors.paid_on" class="text-sm text-red-600 mt-1">{{ repaymentForm.errors.paid_on }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Method</label>
+                                    <select v-model="repaymentForm.method"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm">
+                                        <option v-for="method in repaymentMethods" :key="method" :value="method">
+                                            {{ method.replace(/_/g, ' ') }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Reference (optional)</label>
+                                    <input v-model="repaymentForm.reference" type="text" maxlength="255"
+                                        class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Proof of payment (optional)</label>
+                                <input type="file" accept=".pdf,.jpg,.jpeg,.png" @input="repaymentForm.proof = $event.target.files[0]"
+                                    class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-400" />
+                                <p v-if="repaymentForm.errors.proof" class="text-sm text-red-600 mt-1">{{ repaymentForm.errors.proof }}</p>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                The fund's treasurer confirms it against the account before it reduces the balance.
+                            </p>
+                            <div class="flex items-center gap-3">
+                                <button type="submit" :disabled="repaymentForm.processing"
+                                    class="px-4 py-2 rounded-lg bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 disabled:opacity-50 transition">
+                                    Submit
+                                </button>
+                                <button type="button" class="text-sm text-gray-500 hover:underline" @click="showRepaymentForm = false">Cancel</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 

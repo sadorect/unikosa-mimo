@@ -63,9 +63,23 @@ class LoanPolicy
             || $this->officerWith($user, $loan, 'disburse loans', 'disburser');
     }
 
+    /**
+     * The borrower, anyone who accepted guarantorship, and the fund's own
+     * officers. A guarantor paying on a defaulting borrower's behalf is the
+     * point of guarantorship, so they must be able to put money in without
+     * anyone's permission.
+     */
     public function recordRepayment(User $user, Loan $loan): bool
     {
-        return $loan->user_id === $user->id || $this->confirmRepayment($user, $loan);
+        if ($loan->user_id === $user->id) {
+            return true;
+        }
+
+        if ($loan->guarantors()->where('user_id', $user->id)->where('status', 'accepted')->exists()) {
+            return true;
+        }
+
+        return $this->confirmRepayment($user, $loan);
     }
 
     public function manage(User $user, Loan $loan): bool
