@@ -17,6 +17,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Force Custom Error Pages
+    |--------------------------------------------------------------------------
+    | Error pages are suppressed locally and in tests so a developer sees the
+    | real stack trace. The feature test for the pages themselves turns this on
+    | to exercise what a member would actually get.
+    */
+
+    'force_error_pages' => env('FORCE_ERROR_PAGES', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

@@ -34,20 +34,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 return $response;
             }
 
-            if (app()->environment(['local', 'testing'])) {
+            if (app()->environment(['local', 'testing']) && ! config('app.force_error_pages')) {
                 return $response;
             }
 
-            if ($response->getStatusCode() === 419) {
+            $status = $response->getStatusCode();
+
+            // An expired CSRF token is not worth a whole page: the member is
+            // still where they were, and a flash message lets them retry.
+            if ($status === 419 && back()->getTargetUrl() !== $request->fullUrl()) {
                 return back()->with('error', 'Your session expired. Please try again.');
             }
 
-            if (in_array($response->getStatusCode(), [403, 404, 419, 429, 500, 503], true)) {
-                return Inertia::render('Error', ['status' => $response->getStatusCode()])
-                    ->toResponse($request)
-                    ->setStatusCode($response->getStatusCode());
+            if (! in_array($status, \App\Support\ErrorPage::HANDLED, true)) {
+                return $response;
             }
 
-            return $response;
+            return \App\Support\ErrorResponder::make($status, $exception, $request);
         });
     })->create();
