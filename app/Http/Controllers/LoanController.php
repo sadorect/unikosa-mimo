@@ -122,6 +122,11 @@ class LoanController extends Controller
                     'expires_at' => $guarantor->expires_at,
                 ]),
                 'guarantors_accepted' => $loan->guarantors->where('status', 'accepted')->count(),
+                'disbursed_amount' => $loan->disbursed_amount,
+                'disbursed_at' => $loan->disbursed_at,
+                'disbursement_reference' => $loan->disbursement_reference,
+                'grace_ends_at' => $loan->grace_ends_at,
+                'has_disbursement_proof' => $loan->disbursement_proof_path !== null,
                 'applicant' => ['id' => $loan->applicant->id, 'name' => $loan->applicant->name],
                 'timeline' => $loan->transitions->map(fn ($transition) => [
                     'id' => $transition->id,

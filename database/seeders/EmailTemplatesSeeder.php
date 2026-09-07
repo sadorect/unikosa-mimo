@@ -127,6 +127,34 @@ class EmailTemplatesSeeder extends Seeder
                     . "It is ready to be released to the disburser.",
                 'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'guarantors'],
             ],
+            [
+                'key' => 'loan_disbursement_request',
+                'name' => 'Loan: Disbursement Requested',
+                'subject' => 'Please disburse {{ amount }} - {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "The welfare committee has approved {{ amount }} for {{ applicant }} and released it to you for payment.\n"
+                    . "Please confirm you have received this notice, then record the transfer once it has been made.",
+                'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount'],
+            ],
+            [
+                'key' => 'loan_disbursement_acknowledged',
+                'name' => 'Loan: Disbursement Notice Acknowledged',
+                'subject' => '{{ disburser }} has the disbursement notice for {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ disburser }} has confirmed receiving the notice to disburse {{ amount }}.\n"
+                    . "You will be notified again once the transfer has actually been made.",
+                'variables' => ['site_name', 'name', 'disburser', 'reference', 'amount'],
+            ],
+            [
+                'key' => 'loan_disbursed',
+                'name' => 'Loan: Disbursed',
+                'subject' => 'Loan {{ reference }} has been disbursed',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ amount }} has been released against loan {{ reference }} for {{ applicant }}.\n"
+                    . "Total repayable: {{ total }}, due by {{ due }}.\n"
+                    . "If it is unpaid after {{ grace }}, the loan is recorded as in default and a notice may be published.",
+                'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'total', 'due', 'grace'],
+            ],
         ];
 
         foreach ($templates as $template) {

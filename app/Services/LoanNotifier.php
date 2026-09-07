@@ -7,6 +7,9 @@ use App\Models\UnikosaNotification;
 use App\Models\User;
 use App\Notifications\LoanApproved;
 use App\Notifications\LoanChangesRequested;
+use App\Notifications\LoanDisbursed;
+use App\Notifications\LoanDisbursementAcknowledged;
+use App\Notifications\LoanDisbursementRequest;
 use App\Notifications\LoanGuarantorsSecured;
 use App\Notifications\LoanRejected;
 use App\Notifications\LoanSubmittedForReview;
@@ -74,12 +77,63 @@ class LoanNotifier
                 route('filament.admin.resources.loans.view', $loan)
             )),
 
+            'disburser_notified' => $this->send(
+                $loan->disburser,
+                new LoanDisbursementRequest($loan),
+                'loan_disbursement_request',
+                "Please disburse {$loan->currency} ".number_format((int) $loan->amount_approved)." for loan {$loan->reference}.",
+                route('filament.admin.resources.loans.view', $loan)
+            ),
+
+            'disburser_acknowledged' => $this->reviewersOf($loan)
+                ->push($loan->applicant)
+                ->filter()
+                ->unique('id')
+                ->each(fn (User $recipient) => $this->send(
+                    $recipient,
+                    new LoanDisbursementAcknowledged($loan),
+                    'loan_disbursement_acknowledged',
+                    "The disburser has the notice for loan {$loan->reference}.",
+                    $recipient->id === $loan->user_id
+                        ? route('loans.show', $loan)
+                        : route('filament.admin.resources.loans.view', $loan)
+                )),
+
+            // The applicant and everyone standing for them: this is the
+            // message that starts the payback clock.
+            'disbursed' => $this->applicantAndGuarantors($loan)->each(fn (User $recipient) => $this->send(
+                $recipient,
+                new LoanDisbursed($loan),
+                'loan_disbursed',
+                $recipient->id === $loan->user_id
+                    ? "{$loan->currency} ".number_format((int) $loan->disbursed_amount).' has been released to you. Repayment is due '.($loan->due_at?->toFormattedDayDateString() ?? 'shortly').'.'
+                    : "A loan you are guaranteeing ({$loan->reference}) has been disbursed.",
+                route('loans.show', $loan)
+            )),
+
             // under_review and approved are deliberately quiet: `under_review`
             // only records that a reviewer picked the application up, and
             // `approved` is immediately followed by `guarantors_pending`,
             // which carries the message the applicant actually needs.
             default => null,
         };
+    }
+
+    /**
+     * The borrower and everyone who accepted guarantorship — the people a
+     * change in the loan's standing actually falls on.
+     */
+    public function applicantAndGuarantors(Loan $loan): Collection
+    {
+        return $loan->guarantors()
+            ->where('status', 'accepted')
+            ->with('user')
+            ->get()
+            ->pluck('user')
+            ->push($loan->applicant)
+            ->filter()
+            ->unique('id')
+            ->values();
     }
 
     /** Everyone who reviews applications for this loan's fund. */

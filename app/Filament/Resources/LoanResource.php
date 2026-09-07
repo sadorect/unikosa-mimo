@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LoanResource\Pages;
 use App\Filament\Resources\LoanResource\RelationManagers;
 use App\Models\Loan;
+use App\Services\LoanDisbursementService;
 use App\Services\LoanStateMachine;
 use Filament\Forms;
 use Filament\Infolists;
@@ -16,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use RuntimeException;
 
 /**
  * The welfare committee's queue.
@@ -92,6 +94,20 @@ class LoanResource extends Resource
                 // publication penalty, not a diagnostic.
                 Infolists\Components\TextEntry::make('terms_agreed_ip')->label('Accepted from IP')->placeholder('—'),
             ])->columns(3),
+
+            Infolists\Components\Section::make('Disbursement')
+                ->visible(fn (Loan $record) => $record->disburser_id !== null)
+                ->schema([
+                    Infolists\Components\TextEntry::make('disburser.name')->label('Disburser')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('disburser_notified_at')->dateTime()->label('Released')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('disburser_acknowledged_at')->dateTime()->label('Acknowledged')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('disbursed_amount')->money('NGN')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('disbursed_at')->date()->placeholder('—'),
+                    Infolists\Components\TextEntry::make('disbursement_reference')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('due_at')->date()->placeholder('—'),
+                    Infolists\Components\TextEntry::make('grace_ends_at')->date()->label('Grace ends')->placeholder('—'),
+                    Infolists\Components\TextEntry::make('total_repayable')->money('NGN')->placeholder('—'),
+                ])->columns(3),
 
             Infolists\Components\Section::make('Review')->schema([
                 Infolists\Components\TextEntry::make('reviewer.name')->label('Reviewer')->placeholder('—'),
@@ -242,6 +258,99 @@ class LoanResource extends Resource
                         ]);
 
                         Notification::make()->success()->title('Application rejected.')->send();
+                    }),
+
+                Tables\Actions\Action::make('release_to_disburser')
+                    ->label('Release to disburser')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->visible(fn (Loan $record) => $record->status === 'guarantors_secured' && Gate::allows('review', $record))
+                    ->form(fn (Loan $record) => [
+                        Forms\Components\Select::make('disburser_id')
+                            ->label('Disburser')
+                            ->options($record->program->disbursers()->pluck('users.name', 'users.id'))
+                            ->default($record->program->disbursers()->value('users.id'))
+                            ->required()
+                            ->helperText('Appointed on the fund. Add a disburser there first if this list is empty.'),
+                    ])
+                    ->action(function (Loan $record, array $data) {
+                        try {
+                            app(LoanDisbursementService::class)->release(
+                                $record,
+                                Auth::user(),
+                                \App\Models\User::find($data['disburser_id'])
+                            );
+                        } catch (RuntimeException $exception) {
+                            Notification::make()->danger()->title($exception->getMessage())->send();
+
+                            return;
+                        }
+
+                        Notification::make()->success()->title('Released. The disburser has been notified.')->send();
+                    }),
+
+                Tables\Actions\Action::make('acknowledge')
+                    ->label('Acknowledge notice')
+                    ->icon('heroicon-o-inbox-arrow-down')
+                    ->visible(fn (Loan $record) => $record->status === 'disburser_notified' && Gate::allows('disburse', $record))
+                    ->requiresConfirmation()
+                    ->modalDescription('Confirms you have received the notice to disburse. You will record the transfer itself separately.')
+                    ->action(function (Loan $record) {
+                        try {
+                            app(LoanDisbursementService::class)->acknowledge($record, Auth::user());
+                        } catch (RuntimeException $exception) {
+                            Notification::make()->danger()->title($exception->getMessage())->send();
+
+                            return;
+                        }
+
+                        Notification::make()->success()->title('Acknowledged.')->send();
+                    }),
+
+                Tables\Actions\Action::make('record_disbursement')
+                    ->label('Record disbursement')
+                    ->icon('heroicon-o-banknotes')
+                    ->color('success')
+                    ->visible(fn (Loan $record) => $record->status === 'disburser_acknowledged' && Gate::allows('disburse', $record))
+                    ->form(fn (Loan $record) => [
+                        Forms\Components\TextInput::make('disbursed_amount')
+                            ->numeric()
+                            ->required()
+                            ->default($record->amount_approved)
+                            ->maxValue((int) $record->amount_approved),
+                        Forms\Components\DatePicker::make('disbursed_at')
+                            ->label('Date the transfer was made')
+                            ->required()
+                            ->default(now())
+                            ->maxDate(now())
+                            ->helperText('The payback clock is counted from this date, not from today.'),
+                        Forms\Components\Select::make('disbursement_method')
+                            ->options(collect(config('loans.disbursement_methods'))->mapWithKeys(fn ($m) => [$m => str($m)->headline()->toString()])->all())
+                            ->default('bank_transfer')
+                            ->required(),
+                        Forms\Components\TextInput::make('disbursement_reference')->label('Bank/transfer reference')->maxLength(255),
+                        Forms\Components\FileUpload::make('disbursement_proof_path')
+                            ->label('Proof of transfer')
+                            // Private disk: this file carries bank details and
+                            // must never be reachable under /storage.
+                            ->disk(config('loans.private_disk'))
+                            ->directory('loan-disbursements')
+                            ->visibility('private')
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                            ->maxSize(config('loans.proof_max_kb')),
+                    ])
+                    ->action(function (Loan $record, array $data) {
+                        try {
+                            app(LoanDisbursementService::class)->recordDisbursement($record, Auth::user(), $data);
+                        } catch (RuntimeException $exception) {
+                            Notification::make()->danger()->title($exception->getMessage())->send();
+
+                            return;
+                        }
+
+                        Notification::make()->success()
+                            ->title('Disbursement recorded.')
+                            ->body('Repayment is due '.$record->fresh()->due_at?->toFormattedDayDateString().'.')
+                            ->send();
                     }),
 
                 Tables\Actions\ViewAction::make(),

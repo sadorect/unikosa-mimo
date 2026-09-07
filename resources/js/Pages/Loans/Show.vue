@@ -160,6 +160,18 @@ function withdraw() {
                     </div>
                 </form>
 
+                <div v-if="loan.disbursed_at" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4">Disbursement</h3>
+                    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                        <div><dt class="text-gray-500">Amount released</dt><dd class="text-gray-800 dark:text-gray-200">{{ loan.currency }} {{ formatMoney(loan.disbursed_amount) }}</dd></div>
+                        <div><dt class="text-gray-500">Date</dt><dd class="text-gray-800 dark:text-gray-200">{{ new Date(loan.disbursed_at).toLocaleDateString() }}</dd></div>
+                        <div v-if="loan.disbursement_reference"><dt class="text-gray-500">Reference</dt><dd class="text-gray-800 dark:text-gray-200 font-mono">{{ loan.disbursement_reference }}</dd></div>
+                        <div v-if="loan.grace_ends_at"><dt class="text-gray-500">Grace period ends</dt><dd class="text-gray-800 dark:text-gray-200">{{ new Date(loan.grace_ends_at).toLocaleDateString() }}</dd></div>
+                    </dl>
+                    <a v-if="loan.has_disbursement_proof" :href="route('loans.proof.disbursement', loan.id)" target="_blank"
+                        class="text-sm text-accent-600 hover:underline mt-4 inline-block">View proof of transfer</a>
+                </div>
+
                 <div v-if="loan.guarantors?.length || can.inviteGuarantors" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                     <div class="flex items-baseline justify-between gap-3">
                         <h3 class="font-semibold text-gray-900 dark:text-gray-100">Guarantors</h3>

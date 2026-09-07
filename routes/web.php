@@ -17,6 +17,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanDocumentController;
 use App\Http\Controllers\LoanGuarantorController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
@@ -130,6 +131,10 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::get('/loans/{loan}/guarantors/candidates', [LoanGuarantorController::class, 'candidates'])->name('loans.guarantors.candidates');
         Route::post('/loans/{loan}/guarantors', [LoanGuarantorController::class, 'store'])->name('loans.guarantors.store');
         Route::delete('/loans/{loan}/guarantors/{guarantor}', [LoanGuarantorController::class, 'destroy'])->name('loans.guarantors.destroy');
+
+        // Private-disk documents, streamed only to people entitled to the loan.
+        Route::get('/loans/{loan}/proof/disbursement', [LoanDocumentController::class, 'disbursementProof'])->name('loans.proof.disbursement');
+        Route::get('/loans/{loan}/proof/repayment/{repayment}', [LoanDocumentController::class, 'repaymentProof'])->name('loans.proof.repayment');
     });
 
     Route::middleware('module:forum')->group(function () {
