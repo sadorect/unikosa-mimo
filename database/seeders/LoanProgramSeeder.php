@@ -44,8 +44,8 @@ class LoanProgramSeeder extends Seeder
                 'reminder_days_before' => [14, 7, 1],
                 'max_active_loans_per_member' => 1,
                 'penalty_enabled' => false,
-                'forum_publication_enabled' => true,
-                'public_publication_allowed' => false,
+                'set_forum_publication_enabled' => true,
+                'association_forum_publication_enabled' => false,
                 'publication_expiry_days' => 90,
             ]
         );

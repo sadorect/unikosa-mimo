@@ -32,12 +32,9 @@ class SettingsSeeder extends Seeder
             ['key' => 'gallery_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'mentorship_enabled', 'value' => 'true', 'group' => 'modules'],
             ['key' => 'transparency_report_enabled', 'value' => 'true', 'group' => 'modules'],
-            // Both loan switches ship off. Phase 1 deploys the schema and the
-            // admin screens with nothing member-facing turned on, and the
-            // public defaulters page stays dark until the association has read
-            // the copy it would publish.
+            // Ships off: the schema and admin screens deploy with nothing
+            // member-facing turned on.
             ['key' => 'loans_enabled', 'value' => 'false', 'group' => 'modules'],
-            ['key' => 'public_defaulters_page_enabled', 'value' => 'false', 'group' => 'modules'],
             ['key' => 'social_facebook', 'value' => '', 'group' => 'social'],
             ['key' => 'social_twitter', 'value' => '', 'group' => 'social'],
             ['key' => 'social_instagram', 'value' => '', 'group' => 'social'],

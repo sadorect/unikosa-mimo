@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\ExpireLoanPublications;
 use App\Jobs\ProcessLoanLifecycle;
 use App\Jobs\SendBirthdayReminders;
 use App\Jobs\SendBlogDigest;
@@ -16,5 +17,6 @@ Schedule::job(new SendBlogDigest)->weekly()->mondays()->at('08:00')->name('blog-
 // "due in 1 day" and "you are overdue" from the same morning.
 Schedule::job(new SendLoanReminders)->dailyAt('09:00')->name('loan-reminders');
 Schedule::job(new ProcessLoanLifecycle)->dailyAt('09:15')->name('loan-lifecycle');
+Schedule::job(new ExpireLoanPublications)->dailyAt('03:30')->name('loan-publication-expiry');
 Schedule::command('db:backup')->daily()->at('02:00')->name('db-backup');
 Schedule::command('elections:close-expired')->everyFiveMinutes()->name('close-expired-elections');

@@ -93,7 +93,10 @@ return [
 
     'officer_roles' => ['reviewer', 'disburser', 'treasurer'],
 
-    'publication_scopes' => ['forum', 'public'],
+    // Both audiences are inside the members-only forum. There is deliberately
+    // no unauthenticated disclosure anywhere in this module: naming a member
+    // on the open internet is not a sanction the association wants to hold.
+    'publication_scopes' => ['set_forum', 'association_forum'],
 
     // Interest is flat over the tenure and frozen at disbursement. Daily
     // accrual cannot be reconciled against a bank statement, which is all the
@@ -112,10 +115,10 @@ return [
     // How long a guarantor invitation stays open.
     'guarantor_invite_days' => 7,
 
-    // A defaulted loan cannot be escalated to the public page until the
-    // default is this many days old. Nobody is publicly named the same day
+    // A default cannot be escalated beyond the borrower's own set until it is
+    // this many days old. Nobody is named to the whole association the day
     // their grace window closes.
-    'public_escalation_min_days' => 14,
+    'association_escalation_min_days' => 14,
 
     'reference_prefix' => 'LN',
 ];

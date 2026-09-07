@@ -121,15 +121,16 @@ class LoanProgramResource extends Resource
                 ])->columns(2),
 
             Forms\Components\Section::make('Publication of defaults')
-                ->description('Publication is the fund\'s sanction. The terms of operation must state it, or there is no consent to rely on.')
+                ->description('Publication is the fund\'s sanction. Every notice stays inside the members-only forum — nothing is ever published outside the association. The terms of operation must state this, or there is no consent to rely on.')
                 ->schema([
-                    Forms\Components\Toggle::make('forum_publication_enabled')
-                        ->label('Publish defaults to the members-only forum')
-                        ->default(true),
-                    Forms\Components\Toggle::make('public_publication_allowed')
-                        ->label('Allow escalation to the public defaulters page')
+                    Forms\Components\Toggle::make('set_forum_publication_enabled')
+                        ->label('Publish defaults to the set\'s forum group')
+                        ->default(true)
+                        ->helperText('Automatic when a loan defaults. Seen by the members of this set — the people the borrower actually knows.'),
+                    Forms\Components\Toggle::make('association_forum_publication_enabled')
+                        ->label('Allow escalation to the association-wide forum')
                         ->default(false)
-                        ->helperText('Never automatic. Even with this on, a super admin must publish each notice by hand, and the site-wide public defaulters page has its own switch.'),
+                        ->helperText('Never automatic. Even with this on, a super admin must escalate each notice by hand, and only after a cooling-off period.'),
                     Forms\Components\TextInput::make('publication_expiry_days')
                         ->numeric()
                         ->default(90)

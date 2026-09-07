@@ -18,6 +18,5 @@ class LoanModuleSwitchTest extends TestCase
     public function test_migrating_alone_leaves_the_module_switched_off(): void
     {
         $this->assertSame('false', Setting::get('loans_enabled'));
-        $this->assertSame('false', Setting::get('public_defaulters_page_enabled'));
     }
 }

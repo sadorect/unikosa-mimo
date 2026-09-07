@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Loan;
+use App\Jobs\PublishLoanDefaultToForum;
 use App\Models\UnikosaNotification;
 use App\Models\User;
 use App\Notifications\LoanApproved;
@@ -132,7 +133,9 @@ class LoanNotifier
                 route('loans.show', $loan)
             )),
 
-            'defaulted' => $this->applicantAndGuarantors($loan)
+            // The notice is posted out of band: a forum failure must never
+            // roll back the default that caused it.
+            'defaulted' => tap($this->applicantAndGuarantors($loan)
                 ->concat($this->reviewersOf($loan))
                 ->push($loan->disburser)
                 ->filter()
@@ -145,7 +148,7 @@ class LoanNotifier
                         ? "Your loan {$loan->reference} is now recorded as in default."
                         : "Loan {$loan->reference} ({$loan->applicant->name}) is now recorded as in default.",
                     route('loans.show', $loan)
-                )),
+                )), fn () => PublishLoanDefaultToForum::dispatch($loan)),
 
             // under_review and approved are deliberately quiet: `under_review`
             // only records that a reviewer picked the application up, and

@@ -30,6 +30,7 @@ class LoanRepaymentService
     public function __construct(
         protected LoanStateMachine $stateMachine,
         protected LoanNotifier $notifier,
+        protected LoanPublicationService $publications,
     ) {}
 
     /** States in which a loan can still take money. */
@@ -199,6 +200,11 @@ class LoanRepaymentService
         ]);
 
         $loan = $loan->fresh();
+
+        // The cure. Clearing the balance removes the notice rather than merely
+        // stopping the next one — and it does not matter whether it was the
+        // borrower or a guarantor who paid.
+        $this->publications->takedownAllFor($loan, $actor, 'The loan has been repaid in full.');
 
         foreach ($this->notifier->applicantAndGuarantors($loan) as $recipient) {
             $this->notifier->send(

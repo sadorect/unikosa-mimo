@@ -104,7 +104,7 @@ class LoanController extends Controller
     {
         Gate::authorize('view', $loan);
 
-        $loan->load(['program.set', 'applicant', 'term', 'reviewer', 'transitions.actor', 'guarantors.user']);
+        $loan->load(['program.set', 'applicant', 'term', 'reviewer', 'transitions.actor', 'guarantors.user', 'publications']);
 
         $isApplicant = $loan->user_id === $request->user()->id;
 
@@ -128,6 +128,16 @@ class LoanController extends Controller
                 'disbursement_reference' => $loan->disbursement_reference,
                 'grace_ends_at' => $loan->grace_ends_at,
                 'has_disbursement_proof' => $loan->disbursement_proof_path !== null,
+                'penalty_amount' => $loan->penalty_amount,
+                'penalty_reason' => $loan->penalty_reason,
+                // Anyone named in a live notice is shown it, and shown how it
+                // comes down.
+                'publications' => $loan->publications()->active()->get()->map(fn ($publication) => [
+                    'id' => $publication->id,
+                    'scope' => $publication->scope,
+                    'published_at' => $publication->published_at,
+                    'expires_at' => $publication->expires_at,
+                ]),
                 'repayments' => $loan->repayments()->with('payer')->orderByDesc('paid_on')->get()->map(fn ($repayment) => [
                     'id' => $repayment->id,
                     'amount' => $repayment->amount,

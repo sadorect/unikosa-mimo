@@ -131,6 +131,26 @@ function withdraw() {
                         </dl>
                     </div>
 
+                    <div v-if="loan.publications?.length" class="mt-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-red-900 dark:text-red-200">A default notice is published</h4>
+                        <ul class="text-sm text-red-800 dark:text-red-300 mt-1 space-y-1">
+                            <li v-for="publication in loan.publications" :key="publication.id">
+                                Published to {{ publication.scope === 'association_forum' ? "the association's forum" : "your set's forum" }}
+                                <span v-if="publication.expires_at"> · expires {{ new Date(publication.expires_at).toLocaleDateString() }}</span>
+                            </li>
+                        </ul>
+                        <p class="text-sm text-red-800 dark:text-red-300 mt-2">
+                            Clearing the balance removes it immediately. It is visible only to signed-in members and carries no contact details.
+                        </p>
+                    </div>
+
+                    <div v-if="loan.penalty_amount > 0" class="mt-5 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-orange-900 dark:text-orange-200">
+                            Penalty applied: {{ loan.currency }} {{ formatMoney(loan.penalty_amount) }}
+                        </h4>
+                        <p v-if="loan.penalty_reason" class="text-sm text-orange-800 dark:text-orange-300 mt-1">{{ loan.penalty_reason }}</p>
+                    </div>
+
                     <div v-if="loan.review_notes" class="mt-5 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                         <h4 class="text-sm font-semibold text-yellow-900 dark:text-yellow-200">Note from the welfare committee</h4>
                         <p class="text-sm text-yellow-800 dark:text-yellow-300 mt-1 whitespace-pre-line">{{ loan.review_notes }}</p>

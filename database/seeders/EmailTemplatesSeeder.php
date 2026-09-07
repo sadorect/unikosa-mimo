@@ -233,6 +233,36 @@ class EmailTemplatesSeeder extends Seeder
                     . "Clearing the balance closes the loan and removes any notice immediately.",
                 'variables' => ['site_name', 'name', 'borrower', 'reference', 'outstanding'],
             ],
+            [
+                'key' => 'loan_default_published',
+                'name' => 'Loan: Default Notice Published',
+                'subject' => 'A default notice for {{ reference }} has been published',
+                'body' => "Hello {{ name }},\n"
+                    . "A notice about loan {{ reference }} has been published to the members' forum for {{ audience }}, as the terms accepted at application provide.\n"
+                    . "Outstanding balance: {{ outstanding }}.\n"
+                    . "The notice is removed the moment the balance is cleared, by the borrower or by a guarantor, and expires on its own by {{ expires }}.\n"
+                    . "It is visible only to members signed in to the platform, and carries no contact details.",
+                'variables' => ['site_name', 'name', 'borrower', 'reference', 'outstanding', 'audience', 'expires'],
+            ],
+            [
+                'key' => 'loan_publication_taken_down',
+                'name' => 'Loan: Default Notice Removed',
+                'subject' => 'The default notice for {{ reference }} has been removed',
+                'body' => "Hello {{ name }},\n"
+                    . "The default notice for loan {{ reference }} has been taken down.\n"
+                    . "Reason: {{ reason }}.",
+                'variables' => ['site_name', 'name', 'reference', 'reason'],
+            ],
+            [
+                'key' => 'loan_penalty_applied',
+                'name' => 'Loan: Penalty Applied',
+                'subject' => 'A penalty has been applied to loan {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "The welfare committee has applied a penalty of {{ penalty }} to your loan.\n"
+                    . "Reason: {{ reason }}\n"
+                    . "Your outstanding balance is now {{ outstanding }}.",
+                'variables' => ['site_name', 'name', 'reference', 'penalty', 'reason', 'outstanding'],
+            ],
         ];
 
         foreach ($templates as $template) {

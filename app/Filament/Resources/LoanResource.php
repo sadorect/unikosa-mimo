@@ -5,7 +5,10 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LoanResource\Pages;
 use App\Filament\Resources\LoanResource\RelationManagers;
 use App\Models\Loan;
+use App\Notifications\LoanPenaltyApplied;
 use App\Services\LoanDisbursementService;
+use App\Services\LoanNotifier;
+use App\Services\LoanPublicationService;
 use App\Services\LoanStateMachine;
 use Filament\Forms;
 use Filament\Infolists;
@@ -353,6 +356,144 @@ class LoanResource extends Resource
                             ->send();
                     }),
 
+                Tables\Actions\Action::make('apply_penalty')
+                    ->label('Apply penalty')
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->color('warning')
+                    ->visible(fn (Loan $record) => ! $record->isPreDisbursement()
+                        && ! in_array($record->status, ['settled', 'written_off'], true)
+                        && Gate::allows('manage', $record))
+                    ->form(fn (Loan $record) => [
+                        Forms\Components\TextInput::make('penalty_amount')
+                            ->numeric()
+                            ->required()
+                            ->default($record->penalty_amount)
+                            ->helperText('Replaces any penalty already on the loan. Enter 0 to remove one.'),
+                        Forms\Components\Textarea::make('penalty_reason')->label('Reason')->required()->maxLength(1000),
+                    ])
+                    ->action(function (Loan $record, array $data) {
+                        $record->update([
+                            'penalty_amount' => (int) $data['penalty_amount'],
+                            'penalty_reason' => $data['penalty_reason'],
+                            'penalty_applied_by' => Auth::id(),
+                            'penalty_applied_at' => now(),
+                        ]);
+
+                        app(LoanNotifier::class)->send(
+                            $record->applicant,
+                            new LoanPenaltyApplied($record->fresh()),
+                            'loan_penalty_applied',
+                            "A penalty has been applied to your loan {$record->reference}.",
+                            route('loans.show', $record)
+                        );
+
+                        Notification::make()->success()->title('Penalty applied and the borrower notified.')->send();
+                    }),
+
+                Tables\Actions\Action::make('publish_to_set_forum')
+                    ->label('Publish to set forum')
+                    ->icon('heroicon-o-megaphone')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalDescription('Posts a notice naming the borrower and their guarantors in this set\'s forum group. It comes down the moment the balance is cleared.')
+                    ->visible(fn (Loan $record) => $record->status === 'defaulted'
+                        && Gate::allows('manage', $record)
+                        && $record->publications()->scope('set_forum')->active()->doesntExist())
+                    ->action(function (Loan $record) {
+                        $publications = app(LoanPublicationService::class);
+
+                        try {
+                            $publication = $publications->publishToSetForum($record, Auth::user());
+                        } catch (RuntimeException $exception) {
+                            Notification::make()->danger()->title($exception->getMessage())->send();
+
+                            return;
+                        }
+
+                        if (! $publication) {
+                            Notification::make()->warning()
+                                ->title('Nothing was published.')
+                                ->body('Either this fund has set-forum publication switched off, or it has no officer to post the notice under.')
+                                ->send();
+
+                            return;
+                        }
+
+                        $publications->announce($record, $publication);
+                        Notification::make()->success()->title('Notice published to the set forum.')->send();
+                    }),
+
+                Tables\Actions\Action::make('escalate_to_association')
+                    ->label('Escalate to the association')
+                    ->icon('heroicon-o-speaker-wave')
+                    ->color('danger')
+                    ->visible(fn (Loan $record) => $record->status === 'defaulted'
+                        && Auth::user()?->can('publish loan defaults')
+                        && $record->program->association_forum_publication_enabled
+                        && $record->publications()->scope('association_forum')->active()->doesntExist())
+                    ->form(fn (Loan $record) => [
+                        Forms\Components\Placeholder::make('warning')
+                            ->label('This names the borrower and their guarantors to every member of the association.')
+                            ->content('It stays inside the members-only forum, never the public site. Clearing the balance removes it immediately.'),
+                        // Typing the reference is the point: it makes this a
+                        // deliberate act rather than a mis-click on a row.
+                        Forms\Components\TextInput::make('confirm_reference')
+                            ->label("Type {$record->reference} to confirm")
+                            ->required()
+                            ->rules(['in:'.$record->reference]),
+                    ])
+                    ->action(function (Loan $record) {
+                        $publications = app(LoanPublicationService::class);
+
+                        try {
+                            $publication = $publications->publishToAssociationForum($record, Auth::user());
+                        } catch (RuntimeException $exception) {
+                            Notification::make()->danger()->title($exception->getMessage())->send();
+
+                            return;
+                        }
+
+                        $publications->announce($record, $publication);
+                        Notification::make()->success()->title('Notice published to the association.')->send();
+                    }),
+
+                Tables\Actions\Action::make('takedown_publications')
+                    ->label('Take down notices')
+                    ->icon('heroicon-o-eye-slash')
+                    ->visible(fn (Loan $record) => Gate::allows('manage', $record) && $record->publications()->active()->exists())
+                    ->form([
+                        Forms\Components\Textarea::make('reason')->label('Why is this coming down?')->required()->maxLength(1000),
+                    ])
+                    ->action(function (Loan $record, array $data) {
+                        $count = app(LoanPublicationService::class)->takedownAllFor($record, Auth::user(), $data['reason']);
+
+                        Notification::make()->success()->title($count.' '.str('notice')->plural($count).' taken down.')->send();
+                    }),
+
+                Tables\Actions\Action::make('write_off')
+                    ->label('Write off')
+                    ->icon('heroicon-o-archive-box-x-mark')
+                    ->requiresConfirmation()
+                    ->modalDescription('Closes the loan as unrecoverable and takes down any notice. The fund does not get the money back.')
+                    ->visible(fn (Loan $record) => $record->status === 'defaulted' && Gate::allows('manage', $record))
+                    ->form([
+                        Forms\Components\Textarea::make('closure_note')->label('Note')->required()->maxLength(1000),
+                    ])
+                    ->action(function (Loan $record, array $data) {
+                        app(LoanStateMachine::class)->transition($record, 'written_off', Auth::user(), [
+                            'reason' => $data['closure_note'],
+                            'attributes' => ['written_off_at' => now(), 'closure_note' => $data['closure_note']],
+                        ]);
+
+                        app(LoanPublicationService::class)->takedownAllFor(
+                            $record->fresh(),
+                            Auth::user(),
+                            'The loan has been written off.'
+                        );
+
+                        Notification::make()->success()->title('Loan written off and notices removed.')->send();
+                    }),
+
                 Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([]);
@@ -363,6 +504,7 @@ class LoanResource extends Resource
         return [
             RelationManagers\GuarantorsRelationManager::class,
             RelationManagers\RepaymentsRelationManager::class,
+            RelationManagers\PublicationsRelationManager::class,
             RelationManagers\TransitionsRelationManager::class,
         ];
     }

@@ -34,7 +34,7 @@ return new class extends Migration
         // The module switches are written here, not only in SettingsSeeder:
         // CheckModuleEnabled treats a *missing* key as enabled, so migrating
         // without seeding would put /loans live the moment this deploys.
-        foreach (['loans_enabled', 'public_defaulters_page_enabled'] as $key) {
+        foreach (['loans_enabled'] as $key) {
             if (! DB::table('settings')->where('key', $key)->exists()) {
                 DB::table('settings')->insert([
                     'key' => $key,

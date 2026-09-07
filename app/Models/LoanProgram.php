@@ -27,7 +27,7 @@ class LoanProgram extends Model
         'required_guarantors', 'grace_days', 'reminder_days_before',
         'max_active_loans_per_member', 'min_member_tenure_days',
         'penalty_enabled', 'penalty_flat_amount', 'penalty_rate_bps', 'penalty_basis',
-        'forum_publication_enabled', 'public_publication_allowed', 'publication_expiry_days',
+        'set_forum_publication_enabled', 'association_forum_publication_enabled', 'publication_expiry_days',
     ];
 
     protected $casts = [
@@ -45,8 +45,8 @@ class LoanProgram extends Model
         'penalty_enabled' => 'boolean',
         'penalty_flat_amount' => 'integer',
         'penalty_rate_bps' => 'integer',
-        'forum_publication_enabled' => 'boolean',
-        'public_publication_allowed' => 'boolean',
+        'set_forum_publication_enabled' => 'boolean',
+        'association_forum_publication_enabled' => 'boolean',
         'publication_expiry_days' => 'integer',
     ];
 
