@@ -16,7 +16,7 @@ const props = defineProps({
 
 const showingNavigationDropdown = ref(false);
 
-const adminPanelRoles = ['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin'];
+const adminPanelRoles = ['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin', 'loan_officer', 'loan_disburser'];
 const canAccessAdminPanel = computed(() => (props.auth?.user?.roles || []).some((role) => adminPanelRoles.includes(role)));
 
 const roleLabels = {
@@ -25,6 +25,8 @@ const roleLabels = {
     chapter_head: 'Chapter Head',
     content_moderator: 'Content Moderator',
     finance_admin: 'Finance Admin',
+    loan_officer: 'Loan Officer',
+    loan_disburser: 'Loan Disburser',
     member: 'Member',
 };
 const primaryRole = computed(() => {
@@ -46,6 +48,7 @@ const icons = {
     business: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2m-2 0h-4m-6 0H3m2 0h4M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     campaigns: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z',
     dues: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+    loans: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     elections: 'M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z',
 };
 
@@ -79,9 +82,16 @@ const moreGroups = [
         links: [
             { label: 'Campaigns', route: 'campaigns.index', pattern: 'campaigns.*', icon: icons.campaigns },
             { label: 'My Dues', route: 'payments.dues.index', pattern: 'payments.dues.*', icon: icons.dues },
+            { label: 'Loans', route: 'loans.index', pattern: 'loans.*', icon: icons.loans, module: 'loans' },
         ],
     },
 ];
+
+// A link tied to a module disappears entirely when that module is off, rather
+// than leading members to a 503.
+const visibleGroups = computed(() => moreGroups
+    .map((group) => ({ ...group, links: group.links.filter((link) => !link.module || props.settings?.modules?.[link.module]) }))
+    .filter((group) => group.links.length > 0));
 </script>
 
 <template>
@@ -112,7 +122,7 @@ const moreGroups = [
                                     </button>
                                 </template>
                                 <template #content>
-                                    <template v-for="(group, index) in moreGroups" :key="group.label">
+                                    <template v-for="(group, index) in visibleGroups" :key="group.label">
                                         <div v-if="index > 0" class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
                                         <div class="px-4 pt-2 pb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                                             {{ group.label }}
@@ -218,7 +228,7 @@ const moreGroups = [
                         </span>
                     </ResponsiveNavLink>
 
-                    <template v-for="group in moreGroups" :key="group.label">
+                    <template v-for="group in visibleGroups" :key="group.label">
                         <div class="px-4 pt-3 pb-1 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                             {{ group.label }}
                         </div>

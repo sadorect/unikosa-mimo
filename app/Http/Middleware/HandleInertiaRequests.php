@@ -39,6 +39,12 @@ class HandleInertiaRequests extends Middleware
                 'theme_mode' => Setting::get('theme_mode', 'light'),
                 'font_family' => Setting::get('font_family', 'Inter'),
                 'logo_url' => $logoPath ? Storage::disk(config('filesystems.media_disk'))->url($logoPath) : null,
+                // Modules whose nav entry has to disappear rather than lead to
+                // a 503. Loans ships off, so the link only appears once a set
+                // actually runs a fund.
+                'modules' => [
+                    'loans' => Setting::get('loans_enabled', 'false') === 'true',
+                ],
                 'social' => [
                     'facebook' => Setting::get('social_facebook'),
                     'twitter' => Setting::get('social_twitter'),

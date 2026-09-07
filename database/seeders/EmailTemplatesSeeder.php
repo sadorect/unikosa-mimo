@@ -59,6 +59,45 @@ class EmailTemplatesSeeder extends Seeder
                     . "We look forward to seeing you there!",
                 'variables' => ['site_name', 'name', 'event_title', 'event_date'],
             ],
+            [
+                'key' => 'loan_submitted_for_review',
+                'name' => 'Loan: New Application for Review',
+                'subject' => 'New loan application: {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ applicant }} has applied to the {{ fund }} for {{ amount }}.\n"
+                    . "The application is waiting for the welfare committee to review it.",
+                'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'fund'],
+            ],
+            [
+                'key' => 'loan_changes_requested',
+                'name' => 'Loan: Changes Requested',
+                'subject' => 'Your loan application {{ reference }} needs changes',
+                'body' => "Hello {{ name }},\n"
+                    . "The welfare committee has asked for some changes before they can review your application.\n"
+                    . "What they asked for: {{ notes }}\n"
+                    . "Update your application and resubmit it when you are ready.",
+                'variables' => ['site_name', 'name', 'reference', 'notes'],
+            ],
+            [
+                'key' => 'loan_approved',
+                'name' => 'Loan: Approved',
+                'subject' => 'Your loan {{ reference }} has been approved',
+                'body' => "Hello {{ name }},\n"
+                    . "The welfare committee has approved {{ amount }} over {{ tenure }} months.\n"
+                    . "Before the money can be released, {{ guarantors }} fellow members must accept guarantorship.\n"
+                    . "Open your loan to nominate them.",
+                'variables' => ['site_name', 'name', 'reference', 'amount', 'requested', 'tenure', 'guarantors'],
+            ],
+            [
+                'key' => 'loan_rejected',
+                'name' => 'Loan: Not Approved',
+                'subject' => 'An update on your loan application {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "The welfare committee has reviewed your application and is unable to approve it at this time.\n"
+                    . "Their note: {{ reason }}\n"
+                    . "You are welcome to speak to a committee member about it.",
+                'variables' => ['site_name', 'name', 'reference', 'reason'],
+            ],
         ];
 
         foreach ($templates as $template) {

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
@@ -29,6 +30,21 @@ return new class extends Migration
 
         Role::where('name', 'super_admin')->where('guard_name', 'web')->first()
             ?->givePermissionTo([$manage, $review, $disburse, $publish]);
+
+        // The module switches are written here, not only in SettingsSeeder:
+        // CheckModuleEnabled treats a *missing* key as enabled, so migrating
+        // without seeding would put /loans live the moment this deploys.
+        foreach (['loans_enabled', 'public_defaulters_page_enabled'] as $key) {
+            if (! DB::table('settings')->where('key', $key)->exists()) {
+                DB::table('settings')->insert([
+                    'key' => $key,
+                    'value' => 'false',
+                    'group' => 'modules',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }

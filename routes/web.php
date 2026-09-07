@@ -16,6 +16,7 @@ use App\Http\Controllers\ElectionController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LegalController;
@@ -108,6 +109,17 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::post('/elections/{election}/vote', [ElectionController::class, 'vote'])
             ->middleware('throttle:10,1')
             ->name('elections.vote');
+    });
+
+    Route::middleware('module:loans')->group(function () {
+        Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+        // Static segments before the wildcard, or /loans/apply binds as a loan.
+        Route::get('/loans/apply', [LoanController::class, 'create'])->name('loans.create');
+        Route::get('/loans/terms', [LoanController::class, 'terms'])->name('loans.terms');
+        Route::post('/loans', [LoanController::class, 'store'])->name('loans.store');
+        Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
+        Route::patch('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
+        Route::delete('/loans/{loan}', [LoanController::class, 'withdraw'])->name('loans.withdraw');
     });
 
     Route::middleware('module:forum')->group(function () {
