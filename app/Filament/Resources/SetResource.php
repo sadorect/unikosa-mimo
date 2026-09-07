@@ -32,7 +32,14 @@ class SetResource extends Resource
                 ->helperText('The set\'s public/primary contact.'),
             Forms\Components\Select::make('coordinators')
                 ->label('Approval coordinators')
-                ->relationship('coordinators', 'name')
+                // Filament issues SELECT DISTINCT for a BelongsToMany select, and
+                // Postgres has no equality operator for the json columns on users,
+                // so the options query has to name its columns.
+                ->relationship(
+                    'coordinators',
+                    'name',
+                    fn ($query) => $query->select(['users.id', 'users.name'])
+                )
                 ->multiple()
                 ->searchable()
                 ->preload()
