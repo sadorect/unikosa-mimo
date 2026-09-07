@@ -11,6 +11,27 @@ class EmailTemplatesSeeder extends Seeder
     {
         $templates = [
             [
+                'key' => 'registration_pending',
+                'name' => 'Registration Received / Pending Approval',
+                'subject' => 'We have received your {{ site_name }} registration',
+                'body' => "Hello {{ name }},\n"
+                    . "Thank you for registering. Your account has been created and is now awaiting review by one of our administrators.\n"
+                    . "You will not be able to access member areas until that review is complete.\n"
+                    . "We will email you as soon as a decision has been made - whether your account is approved or declined.\n"
+                    . "No further action is needed from you in the meantime.",
+                'variables' => ['site_name', 'name'],
+            ],
+            [
+                'key' => 'registration_declined',
+                'name' => 'Registration Declined',
+                'subject' => 'An update on your {{ site_name }} registration',
+                'body' => "Hello {{ name }},\n"
+                    . "Thank you for your interest in joining our alumni community.\n"
+                    . "Your registration has been reviewed and we are unable to approve your account at this time.\n"
+                    . "If you believe this was a mistake, please reply to this message or contact us so we can look into it.",
+                'variables' => ['site_name', 'name'],
+            ],
+            [
                 'key' => 'welcome',
                 'name' => 'Welcome / Profile Approved',
                 'subject' => 'Your {{ site_name }} profile has been approved!',

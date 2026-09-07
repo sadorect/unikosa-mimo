@@ -3,6 +3,8 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Notifications\MemberPendingApprovalNotification;
+use App\Services\MembershipReviewNotifier;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -16,7 +18,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
             'phone' => ['nullable', 'string', 'max:20'],
-            'graduating_set_id' => ['nullable', 'exists:sets,id'],
+            'graduating_set_id' => ['required', 'exists:sets,id'],
         ]);
 
         if ($validator->fails()) {
@@ -28,11 +30,14 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
             'phone' => $input['phone'] ?? null,
-            'graduating_set_id' => $input['graduating_set_id'] ?? null,
+            'graduating_set_id' => $input['graduating_set_id'],
             'status' => 'pending',
         ]);
 
         $user->assignRole('member');
+
+        $user->notify(new MemberPendingApprovalNotification());
+        MembershipReviewNotifier::notify($user);
 
         return $user;
     }

@@ -22,6 +22,10 @@ defineProps({ status: String });
                     Thanks for signing up! An administrator needs to review and approve your membership before you can
                     access the site. You'll be able to sign in as usual once that's done.
                 </p>
+                <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+                    We've emailed you a confirmation of this, and we'll email you again as soon as your account has been
+                    reviewed &mdash; whether it is approved or declined.
+                </p>
             </template>
 
             <div class="mt-8 flex items-center justify-center gap-4 text-sm">

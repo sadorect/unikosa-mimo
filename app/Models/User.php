@@ -24,6 +24,7 @@ class User extends Authenticatable implements FilamentUser
         'gender', 'graduating_set_id', 'house', 'country', 'city',
         'profession', 'bio', 'skills', 'social_links', 'avatar',
         'status', 'chapter_id', 'imported', 'account_claimed',
+        'reviewed_by_id', 'reviewed_at',
         'imported_at', 'claimed_at',
     ];
 
@@ -44,12 +45,49 @@ class User extends Authenticatable implements FilamentUser
             'account_claimed' => 'boolean',
             'imported_at' => 'datetime',
             'claimed_at' => 'datetime',
+            'reviewed_at' => 'datetime',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin']);
+        return $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin'])
+            || $this->coordinatedSets()->exists();
+    }
+
+    /**
+     * Sets this user coordinates, i.e. whose signups they may approve or reject.
+     */
+    public function coordinatedSets(): BelongsToMany
+    {
+        return $this->belongsToMany(Set::class, 'set_coordinators', 'user_id', 'set_id')->withTimestamps();
+    }
+
+    /**
+     * The admin who approved or rejected this member.
+     */
+    public function reviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reviewed_by_id');
+    }
+
+    /**
+     * Super admins review anyone; a set coordinator only their own sets' signups.
+     * A member with no set at all is a super-admin-only case by design.
+     */
+    public function canReviewMember(User $member): bool
+    {
+        if ($this->hasRole('super_admin')) {
+            return true;
+        }
+
+        if ($member->graduating_set_id === null) {
+            return false;
+        }
+
+        // The coordinator pivot is the authority here, not the role, so a failed
+        // role sync can never silently strip a coordinator of their own set.
+        return $this->coordinatedSets()->whereKey($member->graduating_set_id)->exists();
     }
 
     public function graduatingSet(): BelongsTo

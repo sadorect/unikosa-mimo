@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
@@ -22,6 +23,62 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Management';
     protected static ?int $navigationSort = 1;
+
+    /**
+     * Super admins see every user. A set coordinator only ever sees members of
+     * the sets they coordinate — without this the `manage members` permission
+     * alone would expose (and allow deleting) every account on the platform.
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Auth::user();
+
+        if (! $user || $user->hasRole('super_admin')) {
+            return $query;
+        }
+
+        return $query->whereIn('graduating_set_id', $user->coordinatedSets()->pluck('sets.id'));
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasAnyPermission(['manage members']) || $user->coordinatedSets()->exists();
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()?->hasRole('super_admin') ?? false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return Auth::user()?->hasRole('super_admin') ?? false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return Auth::user()?->hasRole('super_admin') ?? false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return Auth::user()?->hasRole('super_admin') ?? false;
+    }
+
+    /**
+     * Whether the current admin may act on this particular signup.
+     */
+    protected static function canReview(User $record): bool
+    {
+        return Auth::user()?->canReviewMember($record) ?? false;
+    }
 
     public static function form(Form $form): Form
     {
@@ -77,6 +134,8 @@ class UserResource extends Resource
                 Tables\Columns\IconColumn::make('imported')->boolean()->label('Imported'),
                 Tables\Columns\IconColumn::make('account_claimed')->boolean()->label('Claimed'),
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge(),
+                Tables\Columns\TextColumn::make('reviewedBy.name')->label('Reviewed by')->placeholder('—')->toggleable(),
+                Tables\Columns\TextColumn::make('reviewed_at')->dateTime()->label('Reviewed at')->placeholder('—')->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')->dateTime(),
             ])
             ->filters([
@@ -87,28 +146,28 @@ class UserResource extends Resource
                 Tables\Filters\TernaryFilter::make('account_claimed')->label('Claimed'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
                 Tables\Actions\Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (User $record): bool => $record->status === 'pending')
+                    ->visible(fn (User $record): bool => $record->status === 'pending' && static::canReview($record))
                     ->action(function (User $record): void {
-                        $record->update(['status' => 'approved']);
-                        if (!$record->hasRole('member')) {
-                            $record->assignRole('member');
-                        }
-                        $record->notify(new \App\Notifications\MemberApprovedNotification());
+                        static::approve($record);
                     })
                     ->requiresConfirmation(),
                 Tables\Actions\Action::make('reject')
                     ->label('Reject')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn (User $record): bool => $record->status === 'pending')
-                    ->action(fn (User $record) => $record->update(['status' => 'rejected']))
+                    ->visible(fn (User $record): bool => $record->status === 'pending' && static::canReview($record))
+                    ->action(function (User $record): void {
+                        static::reject($record);
+                    })
                     ->requiresConfirmation(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -118,9 +177,8 @@ class UserResource extends Resource
                         ->color('success')
                         ->action(function ($records): void {
                             foreach ($records as $record) {
-                                $record->update(['status' => 'approved']);
-                                if (!$record->hasRole('member')) {
-                                    $record->assignRole('member');
+                                if (static::canReview($record)) {
+                                    static::approve($record);
                                 }
                             }
                         })
@@ -129,11 +187,50 @@ class UserResource extends Resource
                         ->label('Reject Selected')
                         ->icon('heroicon-o-x-circle')
                         ->color('danger')
-                        ->action(fn ($records) => $records->each->update(['status' => 'rejected']))
+                        ->action(function ($records): void {
+                            foreach ($records as $record) {
+                                if (static::canReview($record)) {
+                                    static::reject($record);
+                                }
+                            }
+                        })
                         ->requiresConfirmation(),
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
                 ]),
             ]);
+    }
+
+    /**
+     * Approve a signup, recording who did it, and tell the member.
+     */
+    protected static function approve(User $record): void
+    {
+        $record->update([
+            'status' => 'approved',
+            'reviewed_by_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        if (! $record->hasRole('member')) {
+            $record->assignRole('member');
+        }
+
+        $record->notify(new \App\Notifications\MemberApprovedNotification());
+    }
+
+    /**
+     * Reject a signup, recording who did it, and tell the member.
+     */
+    protected static function reject(User $record): void
+    {
+        $record->update([
+            'status' => 'rejected',
+            'reviewed_by_id' => Auth::id(),
+            'reviewed_at' => now(),
+        ]);
+
+        $record->notify(new \App\Notifications\MemberRejectedNotification());
     }
 
     public static function getRelations(): array

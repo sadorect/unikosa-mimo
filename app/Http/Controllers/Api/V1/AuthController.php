@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\User;
+use App\Notifications\MemberPendingApprovalNotification;
+use App\Services\MembershipReviewNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -35,6 +37,7 @@ class AuthController extends ApiController
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Password::defaults()],
+            'graduating_set_id' => ['required', 'exists:sets,id'],
         ]);
 
         $user = User::create([
@@ -44,6 +47,9 @@ class AuthController extends ApiController
         ]);
 
         $user->assignRole('member');
+        $user->notify(new MemberPendingApprovalNotification());
+        MembershipReviewNotifier::notify($user);
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([

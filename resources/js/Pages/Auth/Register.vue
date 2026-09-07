@@ -5,6 +5,10 @@ import CaptchaField from '@/Components/CaptchaField.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
+defineProps({
+    sets: { type: Array, default: () => [] },
+});
+
 const captcha = ref(null);
 const form = useForm({
     name: '',
@@ -59,6 +63,19 @@ const submit = () => {
                         placeholder="+234 800 0000 000" />
                 </div>
 
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Graduating set</label>
+                    <select v-model="form.graduating_set_id" required
+                        class="w-full border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent transition">
+                        <option value="" disabled>Select your graduating set</option>
+                        <option v-for="set in sets" :key="set.id" :value="set.id">{{ set.name }}</option>
+                    </select>
+                    <p v-if="form.errors.graduating_set_id" class="mt-1 text-xs text-red-500">{{ form.errors.graduating_set_id }}</p>
+                    <p v-else class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Your set's coordinator reviews and approves your membership, so please pick the right year.
+                    </p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
@@ -76,7 +93,8 @@ const submit = () => {
                 </div>
 
                 <div class="bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg p-3 text-xs text-accent-800 dark:text-accent-300">
-                    Your registration will be reviewed by a set rep or admin before your profile becomes visible in the directory.
+                    Your registration will be reviewed by your set's coordinator or an administrator before your profile
+                    becomes visible in the directory. We'll email you once it has been reviewed.
                 </div>
 
                 <CaptchaField ref="captcha" form="register" v-model:id="form.captcha_id" v-model:answer="form.captcha_answer" :error="form.errors.captcha_answer" />

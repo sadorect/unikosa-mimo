@@ -28,7 +28,15 @@ class SetResource extends Resource
             Forms\Components\TextInput::make('name')->required(),
             Forms\Components\TextInput::make('year')->numeric()->required(),
             Forms\Components\Textarea::make('description'),
-            Forms\Components\Select::make('rep_id')->label('Representative')->relationship('rep', 'name')->searchable()->nullable(),
+            Forms\Components\Select::make('rep_id')->label('Representative')->relationship('rep', 'name')->searchable()->nullable()
+                ->helperText('The set\'s public/primary contact.'),
+            Forms\Components\Select::make('coordinators')
+                ->label('Approval coordinators')
+                ->relationship('coordinators', 'name')
+                ->multiple()
+                ->searchable()
+                ->preload()
+                ->helperText('These members can approve or reject signups for this set, and are emailed when someone signs up. They are granted the Set Representative role automatically.'),
         ]);
     }
 
@@ -39,6 +47,8 @@ class SetResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable(),
                 Tables\Columns\TextColumn::make('year')->sortable(),
                 Tables\Columns\TextColumn::make('rep.name')->label('Rep'),
+                Tables\Columns\TextColumn::make('coordinators.name')->label('Coordinators')->badge()
+                    ->placeholder('None — signups fall to admins'),
                 Tables\Columns\TextColumn::make('members_count')->counts('members')->label('Members'),
                 Tables\Columns\TextColumn::make('created_at')->dateTime(),
             ])
