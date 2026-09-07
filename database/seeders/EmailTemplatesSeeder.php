@@ -193,6 +193,46 @@ class EmailTemplatesSeeder extends Seeder
                     . "If you guaranteed this loan, your obligation has ended.",
                 'variables' => ['site_name', 'name', 'reference', 'total'],
             ],
+            [
+                'key' => 'loan_due_soon',
+                'name' => 'Loan: Due Soon',
+                'subject' => 'Your loan {{ reference }} is due in {{ days }} days',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ outstanding }} is outstanding on your loan, due {{ due }}.\n"
+                    . "Once you have paid, record it on the platform so the fund can confirm it.",
+                'variables' => ['site_name', 'name', 'reference', 'outstanding', 'due', 'days'],
+            ],
+            [
+                'key' => 'loan_overdue',
+                'name' => 'Loan: Overdue',
+                'subject' => 'Your loan {{ reference }} is overdue',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ outstanding }} was due on {{ due }} and is still outstanding.\n"
+                    . "You have until {{ grace }} to clear it. After that the loan is recorded as in default, and a notice naming you and your guarantors may be published.\n"
+                    . "Your guarantors have been notified.",
+                'variables' => ['site_name', 'name', 'reference', 'outstanding', 'due', 'grace'],
+            ],
+            [
+                'key' => 'loan_guarantor_nudge',
+                'name' => 'Loan: Guarantor Nudge',
+                'subject' => 'A loan you guaranteed is overdue - {{ reference }}',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ borrower }}'s loan, which you guaranteed, has passed its due date with {{ outstanding }} outstanding.\n"
+                    . "Please prompt them to settle it before {{ grace }}.\n"
+                    . "If it is still unpaid after that date, the loan is recorded as in default and a notice naming both of you may be published.\n"
+                    . "You can also pay towards the balance yourself if you would rather settle it directly.",
+                'variables' => ['site_name', 'name', 'borrower', 'reference', 'outstanding', 'grace'],
+            ],
+            [
+                'key' => 'loan_defaulted',
+                'name' => 'Loan: In Default',
+                'subject' => 'Loan {{ reference }} is now in default',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ borrower }}'s loan {{ reference }} has passed its grace period with {{ outstanding }} outstanding and is now recorded as in default.\n"
+                    . "A notice may now be published to the association naming the borrower and their guarantors.\n"
+                    . "Clearing the balance closes the loan and removes any notice immediately.",
+                'variables' => ['site_name', 'name', 'borrower', 'reference', 'outstanding'],
+            ],
         ];
 
         foreach ($templates as $template) {

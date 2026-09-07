@@ -7,10 +7,13 @@ use App\Models\UnikosaNotification;
 use App\Models\User;
 use App\Notifications\LoanApproved;
 use App\Notifications\LoanChangesRequested;
+use App\Notifications\LoanDefaulted;
 use App\Notifications\LoanDisbursed;
 use App\Notifications\LoanDisbursementAcknowledged;
 use App\Notifications\LoanDisbursementRequest;
+use App\Notifications\LoanGuarantorNudge;
 use App\Notifications\LoanGuarantorsSecured;
+use App\Notifications\LoanOverdue;
 use App\Notifications\LoanRejected;
 use App\Notifications\LoanSubmittedForReview;
 use Illuminate\Notifications\Notification;
@@ -111,6 +114,39 @@ class LoanNotifier
                 route('loans.show', $loan)
             )),
 
+            // The borrower is told directly; guarantors are nudged separately
+            // (from in_grace) so they are not chased twice in one minute.
+            'overdue' => $this->send(
+                $loan->applicant,
+                new LoanOverdue($loan),
+                'loan_overdue',
+                "Your loan {$loan->reference} is overdue. {$loan->currency} ".number_format($loan->outstanding_amount).' is outstanding.',
+                route('loans.show', $loan)
+            ),
+
+            'in_grace' => $this->guarantorsOf($loan)->each(fn (User $guarantor) => $this->send(
+                $guarantor,
+                new LoanGuarantorNudge($loan),
+                'loan_guarantor_nudge',
+                "A loan you guaranteed ({$loan->reference}) is overdue. You can prompt {$loan->applicant->name} or pay towards it yourself.",
+                route('loans.show', $loan)
+            )),
+
+            'defaulted' => $this->applicantAndGuarantors($loan)
+                ->concat($this->reviewersOf($loan))
+                ->push($loan->disburser)
+                ->filter()
+                ->unique('id')
+                ->each(fn (User $recipient) => $this->send(
+                    $recipient,
+                    new LoanDefaulted($loan),
+                    'loan_defaulted',
+                    $recipient->id === $loan->user_id
+                        ? "Your loan {$loan->reference} is now recorded as in default."
+                        : "Loan {$loan->reference} ({$loan->applicant->name}) is now recorded as in default.",
+                    route('loans.show', $loan)
+                )),
+
             // under_review and approved are deliberately quiet: `under_review`
             // only records that a reviewer picked the application up, and
             // `approved` is immediately followed by `guarantors_pending`,
@@ -131,6 +167,19 @@ class LoanNotifier
             ->get()
             ->pluck('user')
             ->push($loan->applicant)
+            ->filter()
+            ->unique('id')
+            ->values();
+    }
+
+    /** Just the people standing for the borrower. */
+    public function guarantorsOf(Loan $loan): Collection
+    {
+        return $loan->guarantors()
+            ->where('status', 'accepted')
+            ->with('user')
+            ->get()
+            ->pluck('user')
             ->filter()
             ->unique('id')
             ->values();
