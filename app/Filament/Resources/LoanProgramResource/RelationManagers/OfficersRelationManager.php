@@ -19,6 +19,15 @@ class OfficersRelationManager extends RelationManager
 {
     protected static string $relationship = 'officers';
 
+    /**
+     * Stated rather than guessed. Filament derives the inverse from the owner
+     * model's name — LoanProgram becomes loanPrograms() — and the relation on
+     * User is called loanProgramOfficerships() because holding an office is
+     * not the same as belonging to a fund. Without this, opening the attach
+     * form is a 500.
+     */
+    protected static ?string $inverseRelationship = 'loanProgramOfficerships';
+
     protected static ?string $title = 'Officers';
 
     public function form(Form $form): Form
