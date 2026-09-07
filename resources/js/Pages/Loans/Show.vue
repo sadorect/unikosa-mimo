@@ -16,6 +16,51 @@ const form = useForm({
 
 const withdrawForm = useForm({});
 
+// Guarantor nominations. Candidates are fetched rather than shipped with the
+// page: a graduating set can run to hundreds of members.
+const inviteForm = useForm({ user_id: null });
+const search = ref('');
+const candidates = ref([]);
+const searching = ref(false);
+let searchTimer = null;
+
+function findCandidates() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+        searching.value = true;
+        try {
+            const response = await fetch(route('loans.guarantors.candidates', props.loan.id) + '?q=' + encodeURIComponent(search.value), {
+                headers: { Accept: 'application/json' },
+            });
+            candidates.value = response.ok ? (await response.json()).candidates : [];
+        } finally {
+            searching.value = false;
+        }
+    }, 250);
+}
+
+function invite(candidate) {
+    inviteForm.user_id = candidate.id;
+    inviteForm.post(route('loans.guarantors.store', props.loan.id), {
+        preserveScroll: true,
+        onSuccess: () => { search.value = ''; candidates.value = []; },
+    });
+}
+
+const revokeForm = useForm({});
+
+function revoke(guarantor) {
+    revokeForm.delete(route('loans.guarantors.destroy', [props.loan.id, guarantor.id]), { preserveScroll: true });
+}
+
+const guarantorStatus = {
+    invited: { label: 'Asked', class: 'bg-yellow-100 text-yellow-800' },
+    accepted: { label: 'Accepted', class: 'bg-green-100 text-green-800' },
+    declined: { label: 'Declined', class: 'bg-red-100 text-red-800' },
+    revoked: { label: 'Withdrawn', class: 'bg-gray-100 text-gray-800' },
+    expired: { label: 'Expired', class: 'bg-gray-100 text-gray-800' },
+};
+
 function resubmit() {
     form.patch(route('loans.update', props.loan.id), {
         onSuccess: () => { editing.value = false; },
@@ -114,6 +159,48 @@ function withdraw() {
                         <button type="button" class="text-sm text-gray-500 hover:underline" @click="editing = false">Cancel</button>
                     </div>
                 </form>
+
+                <div v-if="loan.guarantors?.length || can.inviteGuarantors" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">Guarantors</h3>
+                        <span class="text-sm text-gray-500">{{ loan.guarantors_accepted }} of {{ loan.guarantors_required }} accepted</span>
+                    </div>
+
+                    <ul class="mt-4 space-y-2">
+                        <li v-for="guarantor in loan.guarantors" :key="guarantor.id"
+                            class="flex flex-wrap items-center justify-between gap-2 text-sm border-b border-gray-100 dark:border-gray-700 pb-2 last:border-0">
+                            <span class="text-gray-800 dark:text-gray-200">{{ guarantor.name }}</span>
+                            <span class="flex items-center gap-3">
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full" :class="guarantorStatus[guarantor.status]?.class">
+                                    {{ guarantorStatus[guarantor.status]?.label || guarantor.status }}
+                                </span>
+                                <button v-if="can.inviteGuarantors && guarantor.status === 'invited'" type="button"
+                                    class="text-xs text-gray-500 hover:underline" @click="revoke(guarantor)">
+                                    Withdraw request
+                                </button>
+                            </span>
+                        </li>
+                    </ul>
+
+                    <div v-if="can.inviteGuarantors && loan.guarantors_accepted < loan.guarantors_required" class="mt-5 border-t border-gray-100 dark:border-gray-700 pt-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ask a member of your set</label>
+                        <input v-model="search" type="search" placeholder="Search by name" @input="findCandidates"
+                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm" />
+                        <p v-if="inviteForm.errors.user_id" class="text-sm text-red-600 mt-1">{{ inviteForm.errors.user_id }}</p>
+
+                        <ul v-if="candidates.length" class="mt-2 border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700">
+                            <li v-for="candidate in candidates" :key="candidate.id" class="flex items-center justify-between gap-3 p-3">
+                                <span class="min-w-0">
+                                    <span class="text-sm text-gray-800 dark:text-gray-200">{{ candidate.name }}</span>
+                                    <span v-if="candidate.profession" class="block text-xs text-gray-500">{{ candidate.profession }}</span>
+                                </span>
+                                <button type="button" :disabled="inviteForm.processing" @click="invite(candidate)"
+                                    class="text-sm text-accent-600 hover:underline disabled:opacity-50 whitespace-nowrap">Ask</button>
+                            </li>
+                        </ul>
+                        <p v-else-if="search && !searching" class="text-sm text-gray-500 mt-2">No members of your set match that.</p>
+                    </div>
+                </div>
 
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
                     <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-4">History</h3>

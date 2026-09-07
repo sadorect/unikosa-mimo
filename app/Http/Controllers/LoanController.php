@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Loan;
 use App\Models\LoanProgram;
+use App\Models\LoanGuarantor;
 use App\Services\LoanEligibilityService;
+use App\Services\LoanGuarantorService;
 use App\Services\LoanStateMachine;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
@@ -17,6 +19,7 @@ class LoanController extends Controller
     public function __construct(
         protected LoanEligibilityService $eligibility,
         protected LoanStateMachine $stateMachine,
+        protected LoanGuarantorService $guarantors,
     ) {}
 
     public function index(Request $request)
@@ -100,7 +103,9 @@ class LoanController extends Controller
     {
         Gate::authorize('view', $loan);
 
-        $loan->load(['program.set', 'applicant', 'term', 'reviewer', 'transitions.actor']);
+        $loan->load(['program.set', 'applicant', 'term', 'reviewer', 'transitions.actor', 'guarantors.user']);
+
+        $isApplicant = $loan->user_id === $request->user()->id;
 
         return Inertia::render('Loans/Show', [
             'loan' => array_merge($this->loanSummary($loan), [
@@ -109,6 +114,14 @@ class LoanController extends Controller
                 'terms_agreed_at' => $loan->terms_agreed_at,
                 'terms_version' => $loan->term?->version,
                 'guarantors_required' => $loan->guarantors_required,
+                'guarantors' => $loan->guarantors->map(fn (LoanGuarantor $guarantor) => [
+                    'id' => $guarantor->id,
+                    'name' => $guarantor->displayName(),
+                    'status' => $guarantor->status,
+                    'responded_at' => $guarantor->responded_at,
+                    'expires_at' => $guarantor->expires_at,
+                ]),
+                'guarantors_accepted' => $loan->guarantors->where('status', 'accepted')->count(),
                 'applicant' => ['id' => $loan->applicant->id, 'name' => $loan->applicant->name],
                 'timeline' => $loan->transitions->map(fn ($transition) => [
                     'id' => $transition->id,
@@ -123,6 +136,7 @@ class LoanController extends Controller
                 'update' => $request->user()->can('update', $loan),
                 'withdraw' => $request->user()->can('withdraw', $loan),
                 'review' => $request->user()->can('review', $loan),
+                'inviteGuarantors' => $isApplicant && $loan->status === 'guarantors_pending',
             ],
         ]);
     }
@@ -163,6 +177,10 @@ class LoanController extends Controller
         $this->stateMachine->transition($loan, 'withdrawn', $request->user(), [
             'attributes' => ['withdrawn_at' => now()],
         ]);
+
+        // Nobody should be left holding a request to stand for an application
+        // that no longer exists.
+        $this->guarantors->revokeOutstanding($loan);
 
         return redirect()->route('loans.index')->with('success', 'Your application has been withdrawn.');
     }

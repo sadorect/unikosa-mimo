@@ -7,6 +7,7 @@ use App\Models\UnikosaNotification;
 use App\Models\User;
 use App\Notifications\LoanApproved;
 use App\Notifications\LoanChangesRequested;
+use App\Notifications\LoanGuarantorsSecured;
 use App\Notifications\LoanRejected;
 use App\Notifications\LoanSubmittedForReview;
 use Illuminate\Notifications\Notification;
@@ -64,6 +65,14 @@ class LoanNotifier
                 "Your loan {$loan->reference} was approved. Nominate {$loan->guarantors_required} guarantors to continue.",
                 route('loans.show', $loan)
             ),
+
+            'guarantors_secured' => $this->reviewersOf($loan)->each(fn (User $reviewer) => $this->send(
+                $reviewer,
+                new LoanGuarantorsSecured($loan),
+                'loan_guarantors_secured',
+                "Loan {$loan->reference} has its guarantors and is ready to be released to the disburser.",
+                route('filament.admin.resources.loans.view', $loan)
+            )),
 
             // under_review and approved are deliberately quiet: `under_review`
             // only records that a reviewer picked the application up, and

@@ -17,6 +17,7 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\FinancialReportController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanGuarantorController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LegalController;
@@ -120,6 +121,15 @@ Route::middleware(['auth', 'verified', 'approved'])->group(function () {
         Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
         Route::patch('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
         Route::delete('/loans/{loan}', [LoanController::class, 'withdraw'])->name('loans.withdraw');
+
+        // Requests addressed to me, as opposed to loans of my own.
+        Route::get('/guarantorships', [LoanGuarantorController::class, 'index'])->name('loans.guarantorships');
+        Route::post('/guarantorships/{guarantor}/accept', [LoanGuarantorController::class, 'accept'])->name('loans.guarantorships.accept');
+        Route::post('/guarantorships/{guarantor}/decline', [LoanGuarantorController::class, 'decline'])->name('loans.guarantorships.decline');
+
+        Route::get('/loans/{loan}/guarantors/candidates', [LoanGuarantorController::class, 'candidates'])->name('loans.guarantors.candidates');
+        Route::post('/loans/{loan}/guarantors', [LoanGuarantorController::class, 'store'])->name('loans.guarantors.store');
+        Route::delete('/loans/{loan}/guarantors/{guarantor}', [LoanGuarantorController::class, 'destroy'])->name('loans.guarantors.destroy');
     });
 
     Route::middleware('module:forum')->group(function () {

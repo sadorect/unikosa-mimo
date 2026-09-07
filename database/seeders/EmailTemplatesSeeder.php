@@ -98,6 +98,35 @@ class EmailTemplatesSeeder extends Seeder
                     . "You are welcome to speak to a committee member about it.",
                 'variables' => ['site_name', 'name', 'reference', 'reason'],
             ],
+            [
+                'key' => 'loan_guarantor_invited',
+                'name' => 'Loan: Guarantor Request',
+                'subject' => '{{ applicant }} has asked you to guarantee a loan',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ applicant }} has applied for a {{ amount }} loan ({{ reference }}) and has named you as a guarantor.\n"
+                    . "If you accept, your name is recorded against the loan. Should it fall into default, you will be asked to prompt the borrower, and your name may appear alongside theirs in a default notice.\n"
+                    . "Please respond by {{ expires }}.",
+                'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'expires'],
+            ],
+            [
+                'key' => 'loan_guarantor_responded',
+                'name' => 'Loan: Guarantor Answered',
+                'subject' => '{{ guarantor }} has {{ response }} your guarantor request',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ guarantor }} has {{ response }} your request to guarantee loan {{ reference }}.\n"
+                    . "Guarantors still needed: {{ outstanding }}.",
+                'variables' => ['site_name', 'name', 'guarantor', 'reference', 'response', 'outstanding'],
+            ],
+            [
+                'key' => 'loan_guarantors_secured',
+                'name' => 'Loan: Guarantors Secured',
+                'subject' => 'Loan {{ reference }} has its guarantors',
+                'body' => "Hello {{ name }},\n"
+                    . "{{ applicant }}'s loan for {{ amount }} now has all the guarantors it needs.\n"
+                    . "Guarantors: {{ guarantors }}.\n"
+                    . "It is ready to be released to the disburser.",
+                'variables' => ['site_name', 'name', 'applicant', 'reference', 'amount', 'guarantors'],
+            ],
         ];
 
         foreach ($templates as $template) {
