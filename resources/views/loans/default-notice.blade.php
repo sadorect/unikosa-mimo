@@ -4,15 +4,15 @@
 <p><strong>This is a formal notice from the {{ $notice['fund'] }}.</strong></p>
 
 <p>
-    A loan made to <strong>{{ $notice['borrower_name'] }}</strong>@if ($notice['set']) ({{ $notice['set'] }})@endif
-    has passed its repayment date and its grace period, and is recorded as being in default.
+    A loan made to <strong>{{ $notice['borrower_name'] }}</strong>@if ($notice['set']) ({{ $notice['set'] }})@endif has passed
+    its repayment date and its grace period, and is recorded as being in default.
 </p>
 
 <ul>
     <li>Reference: {{ $notice['reference'] }}</li>
     <li>Amount borrowed: {{ $notice['currency'] }} {{ number_format($notice['principal']) }}</li>
     <li>Outstanding: {{ $notice['currency'] }} {{ number_format($notice['outstanding']) }}</li>
-    <li>Was due on: {{ $notice['due_on'] }}</li>
+    <li>Was due on: {{ \Illuminate\Support\Carbon::parse($notice['due_on'])->toFormattedDayDateString() }}</li>
     <li>Days overdue: {{ $notice['days_overdue'] }}</li>
 </ul>
 
