@@ -35,4 +35,13 @@ class Set extends Model
     {
         return $this->hasMany(User::class, 'graduating_set_id');
     }
+
+    /**
+     * Lending funds this set runs. A set may run successive cycles, so this is
+     * a hasMany rather than a column on the set.
+     */
+    public function loanPrograms(): HasMany
+    {
+        return $this->hasMany(LoanProgram::class);
+    }
 }

@@ -51,8 +51,9 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin'])
-            || $this->coordinatedSets()->exists();
+        return $this->hasRole(['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin', 'loan_officer', 'loan_disburser'])
+            || $this->coordinatedSets()->exists()
+            || $this->loanProgramOfficerships()->exists();
     }
 
     /**
@@ -158,5 +159,38 @@ class User extends Authenticatable implements FilamentUser
     public function candidacies(): HasMany
     {
         return $this->hasMany(Candidate::class);
+    }
+
+    public function loans(): HasMany
+    {
+        return $this->hasMany(Loan::class);
+    }
+
+    public function guarantorships(): HasMany
+    {
+        return $this->hasMany(LoanGuarantor::class);
+    }
+
+    /**
+     * Loan funds this user holds an office in. As with coordinatedSets(), this
+     * pivot — not the role — is the authority for what they may act on, so a
+     * failed role sync cannot lock an officer out of their own fund.
+     */
+    public function loanProgramOfficerships(): BelongsToMany
+    {
+        return $this->belongsToMany(LoanProgram::class, 'loan_program_officers', 'user_id', 'loan_program_id')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    public function isLoanOfficer(LoanProgram $program, ?string $role = null): bool
+    {
+        $query = $this->loanProgramOfficerships()->where('loan_programs.id', $program->id);
+
+        if ($role !== null) {
+            $query->wherePivot('role', $role);
+        }
+
+        return $query->exists();
     }
 }

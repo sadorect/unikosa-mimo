@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             EmailTemplatesSeeder::class,
             SetsSeeder::class,
+            LoanProgramSeeder::class,
             SampleDataSeeder::class,
         ]);
     }

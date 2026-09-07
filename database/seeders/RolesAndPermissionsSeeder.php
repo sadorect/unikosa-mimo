@@ -30,6 +30,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'moderate events',
             'manage elections',
             'moderate elections',
+            'manage loans',
+            'review loans',
+            'disburse loans',
+            'publish loan defaults',
         ];
 
         // firstOrCreate, not create: several permissions ('moderate events', the
@@ -51,8 +55,17 @@ class RolesAndPermissionsSeeder extends Seeder
         Role::firstOrCreate(['name' => 'content_moderator', 'guard_name' => 'web'])
             ->syncPermissions(['moderate content', 'manage forum', 'manage blog', 'moderate events', 'moderate elections']);
 
+        // finance_admin administers a fund but never publishes a defaulter:
+        // 'publish loan defaults' is a reputational sanction and stays with
+        // super_admin.
         Role::firstOrCreate(['name' => 'finance_admin', 'guard_name' => 'web'])
-            ->syncPermissions(['manage campaigns', 'manage payments', 'view financial reports', 'manage settings']);
+            ->syncPermissions(['manage campaigns', 'manage payments', 'view financial reports', 'manage settings', 'manage loans']);
+
+        Role::firstOrCreate(['name' => 'loan_officer', 'guard_name' => 'web'])
+            ->syncPermissions(['review loans', 'manage loans']);
+
+        Role::firstOrCreate(['name' => 'loan_disburser', 'guard_name' => 'web'])
+            ->syncPermissions(['disburse loans']);
 
         Role::firstOrCreate(['name' => 'member', 'guard_name' => 'web']);
     }
