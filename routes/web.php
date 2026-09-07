@@ -191,3 +191,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/admin/export-users', [DataExportController::class, 'adminExportUsers'])->name('admin.export.users');
     });
 });
+
+// --- AppDash SSO handoff (dashboard.sadorect.com) --- do not edit by hand ---
+Route::get('/_dash/sso', \App\Http\Controllers\DashboardSsoController::class)
+    ->middleware('throttle:10,1')
+    ->name('dashboard.sso');
