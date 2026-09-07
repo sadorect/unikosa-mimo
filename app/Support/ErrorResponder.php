@@ -24,6 +24,20 @@ class ErrorResponder
     {
         $page = ErrorPage::for($status, $exception, $request);
 
+        // A super admin runs this platform, so a 500 that says only "something
+        // went wrong" is useless to exactly the person who has to fix it.
+        // Nobody else ever sees this block.
+        if (static::viewerMaySeeDetails()) {
+            $page['diagnostic'] = ErrorDiagnostic::for($exception);
+        }
+
+        // Livewire shows the response body in a modal, so the admin panel gets
+        // the readable page rather than the framework's bare 500. It sends
+        // JSON-ish headers, hence handling it before the Inertia attempt.
+        if ($request->hasHeader('X-Livewire')) {
+            return static::decorate(response()->view('errors.fallback', $page, $status));
+        }
+
         try {
             $response = Inertia::render('Error', $page + [
                 'signedIn' => Auth::hasUser() && Auth::check(),
@@ -37,6 +51,23 @@ class ErrorResponder
             $response = response()->view('errors.fallback', $page, $status);
         }
 
+        return static::decorate($response);
+    }
+
+    /**
+     * Only a super admin. Not finance_admin, not a fund officer: a stack trace
+     * names files and can quote data, and administering money is not the same
+     * trust level as administering the platform.
+     */
+    protected static function viewerMaySeeDetails(): bool
+    {
+        return Auth::hasUser()
+            && Auth::check()
+            && (Auth::user()?->hasRole('super_admin') ?? false);
+    }
+
+    protected static function decorate(Response $response): Response
+    {
         // An error page has no business in a search index, and a 404 that
         // ranks for a member's name would be worse than one that doesn't.
         $response->headers->set('X-Robots-Tag', 'noindex, nofollow');

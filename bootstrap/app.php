@@ -34,7 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
-            if ($request->is('api/*') || $request->expectsJson()) {
+            // Livewire drives the admin panel and renders whatever body it
+            // gets back inside a modal, so it wants the readable page, not the
+            // JSON an API client would.
+            if (! $request->hasHeader('X-Livewire') && ($request->is('api/*') || $request->expectsJson())) {
                 return $response;
             }
 
