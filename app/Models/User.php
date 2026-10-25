@@ -217,7 +217,7 @@ class User extends Authenticatable implements FilamentUser
     public function loanProgramOfficerships(): BelongsToMany
     {
         return $this->belongsToMany(LoanProgram::class, 'loan_program_officers', 'user_id', 'loan_program_id')
-            ->withPivot('role')
+            ->withPivot('id', 'role')
             ->withTimestamps();
     }
 

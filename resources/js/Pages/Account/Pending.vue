@@ -26,6 +26,11 @@ defineProps({ status: String });
                     We've emailed you a confirmation of this, and we'll email you again as soon as your account has been
                     reviewed &mdash; whether it is approved or declined.
                 </p>
+                <p class="mt-4 text-sm text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 text-left">
+                    <span class="font-semibold">Can't find our email?</span> Please check your spam or junk folder &mdash;
+                    first-time messages from us sometimes land there. Marking it as "not spam" will make sure future
+                    updates reach your inbox.
+                </p>
             </template>
 
             <div class="mt-8 flex items-center justify-center gap-4 text-sm">

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Concerns\HasPermissionGuardedResource;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use App\Services\Impersonation;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -145,12 +146,13 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('email')->searchable(),
                 Tables\Columns\TextColumn::make('graduatingSet.name')->label('Set'),
                 Tables\Columns\TextColumn::make('chapter.name')->label('Chapter'),
-                Tables\Columns\TextColumn::make('status')->badge(fn (string $state): string => match ($state) {
-                    'pending' => 'warning',
-                    'approved' => 'success',
-                    'rejected' => 'danger',
-                    default => 'gray',
-                }),
+                Tables\Columns\TextColumn::make('status')->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\IconColumn::make('imported')->boolean()->label('Imported'),
                 Tables\Columns\IconColumn::make('account_claimed')->boolean()->label('Claimed'),
                 Tables\Columns\TextColumn::make('roles.name')->label('Role')->badge(),
@@ -198,6 +200,27 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->visible(fn (): bool => Auth::user()?->hasRole('super_admin') ?? false),
+                Tables\Actions\Action::make('impersonate')
+                    ->label('Sign in as')
+                    ->icon('heroicon-o-arrow-right-end-on-rectangle')
+                    ->color('gray')
+                    ->visible(fn (User $record): bool => app(Impersonation::class)->denialReason(Auth::user(), $record) === null)
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (User $record): string => "Sign in as {$record->name}?")
+                    ->modalDescription('You will see the site exactly as this member does until you choose "Stop" in the banner or sign out. The switch is recorded in the activity log.')
+                    ->modalSubmitActionLabel('Sign in')
+                    ->action(function (User $record) {
+                        $impersonation = app(Impersonation::class);
+
+                        // Re-checked at submit time: the row may be stale by now.
+                        if ($impersonation->denialReason(Auth::user(), $record) !== null) {
+                            return null;
+                        }
+
+                        $impersonation->start(Auth::user(), $record);
+
+                        return redirect()->route('dashboard');
+                    }),
                 Tables\Actions\Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-circle')

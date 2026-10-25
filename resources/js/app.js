@@ -7,6 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
 import { Link, Head } from '@inertiajs/vue3';
 import { applyTheme } from './theme';
+import ImpersonationBanner from '@/Components/ImpersonationBanner.vue';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Unikosa';
 
@@ -19,7 +20,8 @@ createInertiaApp({
         applyTheme(props.initialPage.props.settings);
         router.on('navigate', (event) => applyTheme(event.detail.page.props.settings));
 
-        return createApp({ render: () => h(App, props) })
+        // The banner sits beside the page tree so it survives every visit.
+        return createApp({ render: () => [h(App, props), h(ImpersonationBanner)] })
             .use(plugin)
             .use(ZiggyVue, Ziggy)
             .component('Link', Link)

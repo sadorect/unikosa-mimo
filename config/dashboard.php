@@ -20,7 +20,9 @@ return [
 
     'secret' => env('DASHBOARD_SSO_SECRET'),
 
-    // Where to send the user once authenticated.
+    // Where to send the user once authenticated when the token carries no
+    // landing path. Normally the dashboard's own admin URL for this app (edited
+    // there, not here) travels inside the signed token and wins over this.
     'redirect_to' => env('DASHBOARD_SSO_REDIRECT', '/admin'),
 
     /*

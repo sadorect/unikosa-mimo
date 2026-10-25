@@ -121,7 +121,7 @@ const colorMap = {
                 </div>
 
                 <!-- Mobile menu toggle -->
-                <button @click="mobileOpen = !mobileOpen" class="md:hidden p-2 rounded-md text-gray-500">
+                <button @click="mobileOpen = !mobileOpen" :aria-expanded="mobileOpen" aria-label="Toggle navigation menu" class="md:hidden p-2 rounded-md text-gray-500">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path v-if="!mobileOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -130,10 +130,13 @@ const colorMap = {
             </div>
 
             <!-- Mobile menu -->
-            <div v-if="mobileOpen" class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 py-4 space-y-3">
+            <div v-if="mobileOpen"
+                class="md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 px-4 py-4 space-y-3 overflow-y-auto overscroll-contain max-h-[calc(100vh-4rem)]"
+                style="max-height: calc(100dvh - 4rem)">
                 <a href="#features" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Features</a>
                 <a href="#about" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">About</a>
-                <Link :href="route('transparency.index')" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Transparency</Link>
+                <Link :href="route('blog.index')" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Blog</Link>
+                <Link :href="route('transparency.index')" @click="mobileOpen=false" class="block text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-accent-500">Transparency</Link>
                 <div class="pt-2 flex gap-3">
                     <Link v-if="!$page.props.auth.user" :href="route('login')" class="flex-1 text-center border border-accent-500 text-accent-600 py-2 rounded-full text-sm font-semibold">Sign In</Link>
                     <Link v-if="!$page.props.auth.user" :href="route('register')" class="flex-1 text-center bg-accent-500 text-white py-2 rounded-full text-sm font-semibold">Join Now</Link>

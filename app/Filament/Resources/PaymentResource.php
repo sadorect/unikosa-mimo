@@ -30,12 +30,13 @@ class PaymentResource extends Resource
                 Tables\Columns\TextColumn::make('payment_reference')->label('Reference')->searchable(),
                 Tables\Columns\TextColumn::make('amount')->money(fn (Payment $record) => $record->currency),
                 Tables\Columns\TextColumn::make('payment_method')->label('Method')->badge(),
-                Tables\Columns\TextColumn::make('status')->badge(fn (string $state): string => match ($state) {
-                    'successful' => 'success',
-                    'pending' => 'warning',
-                    'failed' => 'danger',
-                    default => 'gray',
-                }),
+                Tables\Columns\TextColumn::make('status')->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'successful' => 'success',
+                        'pending' => 'warning',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('paid_at')->dateTime(),
                 Tables\Columns\TextColumn::make('payable_type')->label('Type')->formatStateUsing(fn ($state) => class_basename($state)),
             ])

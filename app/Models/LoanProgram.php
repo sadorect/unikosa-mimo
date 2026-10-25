@@ -81,7 +81,7 @@ class LoanProgram extends Model
     public function officers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'loan_program_officers', 'loan_program_id', 'user_id')
-            ->withPivot('role')
+            ->withPivot('id', 'role')
             ->withTimestamps();
     }
 

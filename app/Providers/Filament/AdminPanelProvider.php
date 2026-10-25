@@ -14,6 +14,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Filament\Widget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -61,6 +62,8 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            // A super admin viewing as a coordinator lands in this panel too.
+            ->renderHook(PanelsRenderHook::BODY_START, fn (): string => view('filament.impersonation-banner')->render())
             ->navigationGroups([
                 NavigationGroup::make()->label('Management'),
                 NavigationGroup::make()->label('Content'),

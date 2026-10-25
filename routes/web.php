@@ -22,6 +22,7 @@ use App\Http\Controllers\LoanRepaymentController;
 use App\Http\Controllers\LoanStatementController;
 use App\Http\Controllers\LoanGuarantorController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\ImpersonationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\PwaController;
@@ -68,6 +69,11 @@ Route::middleware('module:blog')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    // Super admin "Sign in as". Stop sits here, outside the admin panel, so the
+    // member being viewed can always get the admin back to their own account.
+    Route::post('/impersonate/stop', [ImpersonationController::class, 'stop'])->name('impersonate.stop');
+    Route::post('/impersonate/{user}', [ImpersonationController::class, 'start'])->name('impersonate.start');
+
     Route::get('/account/pending', [AccountStatusController::class, 'pending'])->name('account.pending');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

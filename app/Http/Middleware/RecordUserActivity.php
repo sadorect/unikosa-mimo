@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\User;
+use App\Services\Impersonation;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -26,7 +27,8 @@ class RecordUserActivity
     {
         $user = $request->user();
 
-        if ($user) {
+        // An admin looking around as a member is not that member being online.
+        if ($user && ! app(Impersonation::class)->isActive()) {
             $this->touch($user);
         }
 

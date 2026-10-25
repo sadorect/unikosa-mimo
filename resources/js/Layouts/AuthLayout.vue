@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -7,7 +7,7 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import ThemeToggle from '@/Components/ThemeToggle.vue';
 import Footer from '@/Components/Footer.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 
 const props = defineProps({
     auth: Object,
@@ -15,6 +15,44 @@ const props = defineProps({
 });
 
 const showingNavigationDropdown = ref(false);
+
+// The drawer lives inside a sticky nav, so it can never grow past the viewport
+// or its lower items become unreachable on short screens (landscape phones,
+// split-screen tablets). It scrolls internally instead; see the max-height
+// bound on the drawer itself.
+const closeNavigation = () => { showingNavigationDropdown.value = false; };
+
+// Inertia visits swap the page without unmounting the layout, so the drawer
+// would otherwise stay open over the new page.
+let stopNavigationListener;
+const onKeydown = (event) => {
+    if (event.key === 'Escape') closeNavigation();
+};
+
+// Don't let the page behind the open drawer scroll away under it.
+watch(showingNavigationDropdown, (open) => {
+    document.body.style.overflow = open ? 'hidden' : '';
+});
+
+// The drawer is lg:hidden, so a resize past the breakpoint must clear its state
+// (and the body lock) rather than leave it open behind the desktop nav.
+const desktopQuery = typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)') : null;
+const onDesktopChange = (event) => {
+    if (event.matches) closeNavigation();
+};
+
+onMounted(() => {
+    stopNavigationListener = router.on('navigate', closeNavigation);
+    window.addEventListener('keydown', onKeydown);
+    desktopQuery?.addEventListener('change', onDesktopChange);
+});
+
+onBeforeUnmount(() => {
+    stopNavigationListener?.();
+    window.removeEventListener('keydown', onKeydown);
+    desktopQuery?.removeEventListener('change', onDesktopChange);
+    document.body.style.overflow = '';
+});
 
 const adminPanelRoles = ['super_admin', 'set_representative', 'chapter_head', 'content_moderator', 'finance_admin', 'loan_officer', 'loan_disburser'];
 const canAccessAdminPanel = computed(() => (props.auth?.user?.roles || []).some((role) => adminPanelRoles.includes(role)));
@@ -201,6 +239,7 @@ const visibleGroups = computed(() => moreGroups
 
                         <!-- Hamburger (below lg) -->
                         <button @click="showingNavigationDropdown = !showingNavigationDropdown"
+                            :aria-expanded="showingNavigationDropdown" aria-label="Toggle navigation menu"
                             class="lg:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none transition">
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path :class="{ 'hidden': showingNavigationDropdown, 'inline-flex': !showingNavigationDropdown }" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -212,7 +251,9 @@ const visibleGroups = computed(() => moreGroups
             </div>
 
             <!-- Mobile / tablet nav drawer -->
-            <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }" class="lg:hidden border-t border-gray-100 dark:border-gray-700">
+            <div :class="{ 'block': showingNavigationDropdown, 'hidden': !showingNavigationDropdown }"
+                class="lg:hidden border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-y-auto overscroll-contain max-h-[calc(100vh-4rem)]"
+                style="max-height: calc(100dvh - 4rem)">
                 <div class="pt-2 pb-3 space-y-1">
                     <ResponsiveNavLink v-for="item in primaryNav" :key="item.route" :href="route(item.route)" :active="route().current(item.pattern)">
                         {{ item.label }}

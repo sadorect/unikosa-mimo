@@ -88,7 +88,28 @@ class DashboardSsoController extends Controller
             'ip' => $request->ip(),
         ]);
 
-        return redirect(config('dashboard.redirect_to'));
+        return redirect($this->landingPath($payload));
+    }
+
+    /**
+     * The dashboard says where to land (its per-app admin URL, editable there).
+     * It arrives inside the signed payload, so it cannot be tampered with in
+     * transit; it is still confined to a local path so a mis-set value can
+     * never turn this into an open redirect.
+     */
+    private function landingPath(array $payload): string
+    {
+        $to = $payload['to'] ?? null;
+
+        if (is_string($to)
+            && str_starts_with($to, '/')
+            && ! str_starts_with($to, '//')
+            && ! str_contains($to, '\\')
+            && ! preg_match('/[\x00-\x1F\x7F]/', $to)) {
+            return $to;
+        }
+
+        return config('dashboard.redirect_to');
     }
 
     private function findUser(string $email)

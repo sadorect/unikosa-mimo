@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\Setting;
 use App\Models\UnikosaNotification;
+use App\Services\Impersonation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -33,6 +34,11 @@ class HandleInertiaRequests extends Middleware
                     'roles' => $request->user()->getRoleNames()->toArray(),
                 ] : null,
             ],
+            'impersonation' => function () {
+                $impersonator = app(Impersonation::class)->impersonator();
+
+                return $impersonator ? ['impersonator' => $impersonator->name] : null;
+            },
             'settings' => [
                 'site_name' => Setting::get('site_name', 'Unikosa'),
                 'accent_color' => Setting::get('accent_color', '#F59E0B'),
