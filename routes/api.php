@@ -11,6 +11,10 @@ use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 // Stripe webhook: must be outside CSRF middleware; signature is verified inside the handler.
+// Paystack webhook: signature (HMAC-SHA512 with the secret key) is verified inside the handler.
+Route::post('/webhooks/paystack', [PaymentController::class, 'paystackWebhook'])
+    ->name('payments.webhook.paystack');
+
 Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook'])
     ->name('payments.webhook.stripe');
 

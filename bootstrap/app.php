@@ -34,6 +34,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Livewire rejecting a tampered snapshot or a write to a #[Locked]
+        // property is the defence working, not a fault: scanners hammer
+        // /livewire/update with forged payloads (155 of them on 2026-11-05).
+        // Answer 400 and keep them out of the error log.
+        // Mapped to an HTTP exception, which Laravel never reports.
+        foreach ([
+            \Livewire\Mechanisms\HandleComponents\CorruptComponentPayloadException::class,
+            \Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class,
+        ] as $tampered) {
+            $exceptions->map($tampered, fn (Throwable $e) => new \Symfony\Component\HttpKernel\Exception\HttpException(
+                400, 'This page could not be updated. Please reload it and try again.', $e,
+            ));
+        }
+
         $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
             // Livewire drives the admin panel and renders whatever body it
             // gets back inside a modal, so it wants the readable page, not the

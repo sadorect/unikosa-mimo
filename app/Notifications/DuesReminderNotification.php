@@ -12,6 +12,14 @@ class DuesReminderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /** A deferral from the mail server is temporary, so keep trying for ~an hour. */
+    public int $tries = 5;
+
+    public function backoff(): array
+    {
+        return [60, 300, 900, 1800];
+    }
+
     public function __construct(
         public string $dueName,
         public int $amount,

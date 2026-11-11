@@ -48,6 +48,8 @@ class HandleInertiaRequests extends Middleware
                 // Modules whose nav entry has to disappear rather than lead to
                 // a 503. Loans ships off, so the link only appears once a set
                 // actually runs a fund.
+                // Gateways with keys configured; empty means online payment is off.
+                'payment_methods' => app(\App\Services\PaymentService::class)->availableMethods(),
                 'modules' => [
                     'loans' => Setting::get('loans_enabled', 'false') === 'true',
                 ],

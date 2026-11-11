@@ -1,6 +1,7 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
+import PaymentMethodPicker from '@/Components/PaymentMethodPicker.vue';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -30,7 +31,8 @@ const statusBanner = computed(() => {
 });
 
 const rsvpForm = useForm({ status: 'going' });
-const ticketForm = useForm({ payment_method: 'paystack' });
+const ticketForm = useForm({ payment_method: null });
+const canPay = computed(() => (usePage().props.settings?.payment_methods ?? []).length > 0);
 
 const rsvp = (status) => {
     rsvpForm.status = status;
@@ -120,15 +122,8 @@ const goingCount = props.event.rsvps_going_count || 0;
                             <template v-else>
                                 <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-3">Purchase Ticket</h3>
                                 <div class="text-2xl font-bold text-accent-500 mb-4">{{ event.ticket_currency || 'NGN' }} {{ (event.ticket_price / 100).toFixed(2) }}</div>
-                                <div class="flex gap-3">
-                                    <label v-for="method in ['paystack', 'stripe']" :key="method"
-                                        class="flex items-center gap-2 border rounded-lg px-4 py-2 cursor-pointer hover:border-accent-500"
-                                        :class="{ 'border-accent-500 bg-accent-50 dark:bg-accent-900/20': ticketForm.payment_method === method }">
-                                        <input type="radio" v-model="ticketForm.payment_method" :value="method" class="text-accent-500" />
-                                        <span class="text-sm font-medium capitalize">{{ method }}</span>
-                                    </label>
-                                </div>
-                                <button @click="buyTicket" :disabled="ticketForm.processing"
+                                <PaymentMethodPicker v-model="ticketForm.payment_method" compact :error="ticketForm.errors.payment_method" />
+                                <button v-if="canPay" @click="buyTicket" :disabled="ticketForm.processing"
                                     class="mt-3 bg-accent-500 hover:bg-accent-600 text-white font-medium px-6 py-2 rounded disabled:opacity-50">
                                     {{ ticketForm.processing ? 'Processing...' : 'Buy Ticket' }}
                                 </button>

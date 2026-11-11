@@ -11,7 +11,7 @@ class StripeService
 {
     public function __construct()
     {
-        Stripe::setApiKey(config('services.stripe.secret'));
+        Stripe::setApiKey((string) config('services.stripe.secret'));
     }
 
     public function createCheckoutSession(string $email, int $amount, string $currency, string $successUrl, string $cancelUrl, array $metadata = []): array

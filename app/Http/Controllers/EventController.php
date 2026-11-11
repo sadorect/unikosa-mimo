@@ -232,8 +232,8 @@ class EventController extends Controller
         }
 
         $request->validate([
-            'payment_method' => 'required|in:paystack,stripe',
-        ]);
+            'payment_method' => ['required', \Illuminate\Validation\Rule::in($this->paymentService->availableMethods())],
+        ], ['payment_method.in' => 'Online payment is not available yet.']);
 
         if (! $event->is_paid || ! $event->ticket_price || $event->ticket_price < 1) {
             return back()->with('error', 'This event does not require a paid ticket.');
@@ -259,14 +259,9 @@ class EventController extends Controller
             $request->user()->email,
         );
 
-        if (isset($result['authorization_url'])) {
-            return redirect($result['authorization_url']);
-        }
-        if (isset($result['url'])) {
-            return redirect($result['url']);
-        }
-
-        return back()->with('error', 'Payment initialization failed.');
+        return isset($result['redirect'])
+            ? \Inertia\Inertia::location($result['redirect'])
+            : back()->with('error', $result['error'] ?? 'Payment initialization failed.');
     }
 
     /**

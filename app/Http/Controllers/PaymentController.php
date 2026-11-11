@@ -6,6 +6,8 @@ use App\Models\Campaign;
 use App\Models\Due;
 use App\Models\Payment;
 use App\Services\PaymentService;
+use App\Services\PaystackService;
+use Illuminate\Validation\Rule;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,63 +20,49 @@ class PaymentController extends Controller
 
     public function payDue(Request $request, Due $due)
     {
-        $request->validate(['payment_method' => 'required|in:paystack,stripe']);
+        $user = $request->user();
+        abort_unless($this->duesFor($user)->whereKey($due->id)->exists(), 404);
 
-        $result = $this->paymentService->initiatePayment(
-            $due,
-            $request->payment_method,
-            $due->amount,
-            $due->currency,
-            $request->user()->email,
-        );
-
-        if (isset($result['authorization_url'])) {
-            return redirect($result['authorization_url']);
-        }
-        if (isset($result['url'])) {
-            return redirect($result['url']);
+        if ($this->hasPaid($user->id, $due)) {
+            return redirect()->route('payments.dues.index')->with('error', 'You have already paid this due.');
         }
 
-        return back()->with('error', 'Payment initialization failed.');
+        $request->validate(['payment_method' => ['required', Rule::in($this->paymentService->availableMethods())]], [
+            'payment_method.in' => 'Online payment is not available yet.',
+        ]);
+
+        return $this->toCheckout($this->paymentService->initiatePayment(
+            $due, $request->payment_method, $due->amount, $due->currency, $user->email,
+        ));
     }
 
     public function payCampaign(Request $request, Campaign $campaign)
     {
+        abort_unless($campaign->is_active, 404);
+
         $request->validate([
             'amount' => 'required|integer|min:100',
-            'payment_method' => 'required|in:paystack,stripe',
-        ]);
+            'payment_method' => ['required', Rule::in($this->paymentService->availableMethods())],
+        ], ['payment_method.in' => 'Online payment is not available yet.']);
 
-        $result = $this->paymentService->initiatePayment(
-            $campaign,
-            $request->payment_method,
-            $request->amount,
-            $campaign->currency,
-            $request->user()->email,
-        );
-
-        if (isset($result['authorization_url'])) {
-            return redirect($result['authorization_url']);
-        }
-        if (isset($result['url'])) {
-            return redirect($result['url']);
-        }
-
-        return back()->with('error', 'Payment initialization failed.');
+        return $this->toCheckout($this->paymentService->initiatePayment(
+            $campaign, $request->payment_method, (int) $request->amount, $campaign->currency, $request->user()->email,
+        ));
     }
 
+    /** Where both gateways send the member back after checkout. */
     public function success(Request $request)
     {
-        $reference = $request->query('reference') ?? $request->query('session_id');
+        $reference = $request->query('reference') ?? $request->query('trxref');
 
-        if ($request->query('reference')) {
-            // Paystack: verify with the gateway before marking successful.
+        $payment = $reference
+            ? Payment::where('payment_reference', $reference)->where('user_id', $request->user()->id)->first()
+            : null;
+
+        // Paystack: confirm with the gateway now. Stripe: the signed webhook is the
+        // authority, so this page just shows whatever state it has reached.
+        if ($payment && $payment->payment_method === 'paystack') {
             $payment = $this->paymentService->verifyPaystackPayment($reference);
-        } else {
-            // Stripe: the redirect is informational only. The webhook (POST /api/webhooks/stripe)
-            // is the authoritative confirmation path. Show the current payment state; the UI
-            // should poll or instruct the user to wait for the email confirmation.
-            $payment = Payment::where('payment_reference', $reference)->first();
         }
 
         return Inertia::render('Payments/Success', [
@@ -92,12 +80,14 @@ class PaymentController extends Controller
                 ->update(['status' => 'failed']);
         }
 
-        return redirect()->route('dashboard')->with('error', 'Payment was cancelled.');
+        return redirect()->route('payments.history')->with('error', 'Payment was cancelled.');
     }
 
     public function verifyPaystack(Request $request)
     {
-        $reference = $request->input('reference');
+        $reference = (string) $request->input('reference');
+        abort_unless(Payment::where('payment_reference', $reference)->where('user_id', $request->user()->id)->exists(), 404);
+
         $payment = $this->paymentService->verifyPaystackPayment($reference);
 
         return response()->json([
@@ -115,13 +105,7 @@ class PaymentController extends Controller
             ->where('status', 'successful')
             ->pluck('payable_id');
 
-        $dues = Due::where(function ($query) use ($user) {
-            $query->where('set_id', $user->graduating_set_id)
-                ->orWhere('chapter_id', $user->chapter_id)
-                ->orWhere(function ($query) {
-                    $query->whereNull('set_id')->whereNull('chapter_id');
-                });
-        })
+        $dues = $this->duesFor($user)
             ->whereNotIn('id', $paidDueIds)
             ->latest()
             ->get();
@@ -131,8 +115,14 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function showDue(Due $due)
+    public function showDue(Request $request, Due $due)
     {
+        abort_unless($this->duesFor($request->user())->whereKey($due->id)->exists(), 404);
+
+        if ($this->hasPaid($request->user()->id, $due)) {
+            return redirect()->route('payments.dues.index')->with('success', 'You have already paid this due.');
+        }
+
         return Inertia::render('Payments/PayDue', [
             'due' => $due,
         ]);
@@ -155,6 +145,7 @@ class PaymentController extends Controller
         if ($payment->user_id !== auth()->id() && !auth()->user()->can('manage payments')) {
             abort(403);
         }
+        abort_unless($payment->status === 'successful', 404, 'A receipt is only available once the payment has gone through.');
 
         $payment->load(['payable', 'user']);
 
@@ -167,9 +158,19 @@ class PaymentController extends Controller
         return $pdf->download("receipt-{$payment->payment_reference}.pdf");
     }
 
+    public function paystackWebhook(Request $request, PaystackService $paystack)
+    {
+        if (! $paystack->validWebhookSignature($request->getContent(), $request->header('X-Paystack-Signature'))) {
+            return response()->json(['error' => 'Invalid signature'], 400);
+        }
+
+        $this->paymentService->handlePaystackWebhook($request->json()->all());
+
+        return response()->json(['status' => 'ok']);
+    }
+
     public function stripeWebhook(Request $request)
     {
-        $payload = $request->all();
         $sigHeader = $request->header('Stripe-Signature');
 
         try {
@@ -178,12 +179,33 @@ class PaymentController extends Controller
                 $sigHeader,
                 config('services.stripe.webhook_secret')
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
         $this->paymentService->handleStripeWebhook($event->toArray());
 
         return response()->json(['status' => 'ok']);
+    }
+
+    protected function toCheckout(array $result)
+    {
+        return isset($result['redirect'])
+            ? Inertia::location($result['redirect'])
+            : back()->with('error', $result['error'] ?? 'Payment initialization failed.');
+    }
+
+    protected function duesFor($user)
+    {
+        return Due::applicableTo($user);
+    }
+
+    protected function hasPaid(int $userId, Due $due): bool
+    {
+        return Payment::where('user_id', $userId)
+            ->where('payable_type', Due::class)
+            ->where('payable_id', $due->id)
+            ->where('status', 'successful')
+            ->exists();
     }
 }
