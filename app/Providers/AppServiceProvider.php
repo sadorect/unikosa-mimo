@@ -15,6 +15,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(AuthorizationViewResponse::class, PassportAuthorizationViewResponse::class);
+
+        // No client uses the device flow and it has no screens, so its public
+        // routes could only ever fail. Must be set before Passport boots.
+        Passport::$deviceCodeGrantEnabled = false;
     }
 
     public function boot(): void
